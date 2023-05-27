@@ -33,7 +33,8 @@ const AuthModal: React.FC = () => {
       open: false,
     }));
   };
-
+  
+  
   useEffect(() => {
     if(user) handleClose();
     console.log("user", user)

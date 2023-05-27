@@ -11,17 +11,17 @@ import {
   Image,
   Text,
 } from "@chakra-ui/react";
-import {
-  collection,
-  DocumentData,
-  getDocs,
-  limit,
-  onSnapshot,
-  orderBy,
-  query,
-  QuerySnapshot,
-  where,
-} from "firebase/firestore";
+// import {
+//   collection,
+//   DocumentData,
+//   getDocs,
+//   limit,
+//   onSnapshot,
+//   orderBy,
+//   query,
+//   QuerySnapshot,
+//   where,
+// } from "firebase/firestore";
 import axios from "axios"
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
@@ -46,131 +46,23 @@ const Home: NextPage = () => {
     loading,
     setLoading,
   } = useQuestions();
-
-  const getUserHomeQuestions = async () => {
-    console.log("GETTING USER FEED");
-    setLoading(true);
-    try {
-      const feedQuestions: Question[] = [];
-
-      const questionQuery = query(
-        collection(firestore, "questions"),
-        orderBy("voteStatus", "desc"),
-        limit(10)
-      );
-      const questionDocs = await getDocs(questionQuery);
-      const questions = questionDocs.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Question[];
-      feedQuestions.push(...questions);
-      //}
-
-      console.log("HERE ARE FEED QUESTIONS", feedQuestions);
-
-      setQuestionStateValue((prev) => ({
-        ...prev,
-        questions: feedQuestions,
-      }));
-
-      // if not in any, get 5 communities ordered by number of members
-      // for each one, get 2 questions ordered by voteStatus and set these to questionState questions
-    } catch (error: any) {
-      console.log("getUserHomeQuestions error", error.message);
-    }
-    setLoading(false);
-  };
-
-  const getNoUserHomeQuestions = async () => {
-    console.log("GETTING NO USER FEED");
-    setLoading(true);
-    try {
-      const questionQuery = query(
-        collection(firestore, "questions"),
-        orderBy("voteStatus", "desc"),
-        limit(10)
-      );
-      const questionDocs = await getDocs(questionQuery);
-      const questions = questionDocs.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      console.log("NO USER FEED", questions);
-
-      setQuestionStateValue((prev) => ({
-        ...prev,
-        questions: questions as Question[],
-      }));
-    } catch (error: any) {
-      console.log("getNoUserHomeQuestions error", error.message);
-    }
-    setLoading(false);
-  };
-
-  const getUserQuestionVotes = async () => {
-    const questionIds = questionStateValue.questions.map(
-      (question) => question.id
-    );
-    const questionVotesQuery = query(
-      collection(firestore, `users/${user?.uid}/questionVotes`),
-      where("questionId", "in", questionIds)
-    );
-    const unsubscribe = onSnapshot(questionVotesQuery, (querySnapshot) => {
-      const questionVotes = querySnapshot.docs.map((questionVote) => ({
-        id: questionVote.id,
-        ...questionVote.data(),
-      }));
-
-      setQuestionStateValue((prev) => ({
-        ...prev,
-        questionVotes: questionVotes as QuestionVote[],
-      }));
-    });
-
-    return () => unsubscribe();
-  };
-
-  useEffect(() => {
-    if (user) {
-      getUserHomeQuestions();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (!user && !loadingUser) {
-      getNoUserHomeQuestions();
-    }
-  }, [user, loadingUser]);
-
-  useEffect(() => {
-    if (!user?.uid || !questionStateValue.questions.length) return;
-    getUserQuestionVotes();
-
-    // Clear questionVotes on dismount
-    return () => {
-      setQuestionStateValue((prev) => ({
-        ...prev,
-        questionVotes: [],
-      }));
-    };
-  }, [questionStateValue.questions, user?.uid]);
-
+  
   const [users, setUsers] = useState<any[]>([]);
-
-  // useEffect(() => {
-  //   axios.get('http://localhost:8080/users/getAll')
-  //     .then(response => {
-  //       setUsers(response.data);
-  //     })
-  //     .catch(error => {
-  //       console.error(error);
-  //     });
-  // }, []);
+  
+  useEffect(() => {
+    axios.get('http://localhost:8080/users/getAll')
+      .then(response => {
+        setUsers(response.data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, []);
 
   return (
     <>
       <Image src="https://i.imgur.com/vaHaOhq.png" borderRadius="lg" />
-      {/* <>
+      <>
         {users.length > 0 ? (
           console.log(users)
         ) : (
@@ -178,7 +70,7 @@ const Home: NextPage = () => {
             No users found
           </Text>
         )}
-        </> */}
+        </>
       
       <Center>
         <Text color="brand.100" width="50%" textAlign="center" align="center">

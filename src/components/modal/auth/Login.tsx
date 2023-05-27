@@ -27,10 +27,46 @@ const Login: React.FC<LoginProps> = ({ toggleView }) => {
   ] = useSignInWithEmailAndPassword(auth);
   
 
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>)=>{
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    signInWithEmailAndPassword(loginFrom.email, loginFrom.password);
-  }
+
+    // Hash the password
+    //const hashedPassword = bcrypt.hashSync(loginFrom.password, 10);
+
+    try{
+      // send login data to the backend API
+      const response = await fetch('http://localhost:8080/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: loginFrom.email,
+          password: loginFrom.password
+        })
+      });
+      //console.log(hashedPassword);
+      const data = await response.json();
+      console.log(data);
+      if(data.status === 'ok'){
+        // set the user in the auth state
+        setAuthModalState({
+          open: false,
+          view: "login",
+        });
+      }
+    } catch (error) {
+      console.log("error logging in.", error);
+    }
+    
+    try {
+      await signInWithEmailAndPassword(loginFrom.email, loginFrom.password);
+    } catch (error) {
+      console.log("error logging in.", error);
+    }
+  };
+
+  
   
   
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -5,6 +5,8 @@ import React, { useState } from "react";
 import { useSetRecoilState } from "recoil";
 import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { FIREBASE_ERRORS } from "@/firebase/error";
+import bcrypt from "bcryptjs";
+import axios from "axios";
 
 const SignUp: React.FC = () => {
   const setAuthModalState = useSetRecoilState(authModalState);
@@ -19,14 +21,44 @@ const SignUp: React.FC = () => {
     useCreateUserWithEmailAndPassword(auth); /// this is from the firebase clientapp
 
   /// Here needs to be added prob firebase logic
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  // const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+  //   if (error) setError("");
+  //   if (signUpFrom.password !== signUpFrom.confirmPassword) {
+  //     setError("Passwords do not match");
+  //     return;
+  //   }
+  //   // passwd match
+  //   createUserWithEmailAndPassword(signUpFrom.email, signUpFrom.password);
+  // };
+
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (error) setError("");
     if (signUpFrom.password !== signUpFrom.confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-    // passwd match
+  
+    try {
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(signUpFrom.password, 10);
+      
+      console.log(hashedPassword);
+      // Send user registration data to the backend
+      const response = await axios.post("http://localhost:8080/users/register", {
+        email: signUpFrom.email,
+        password: hashedPassword,
+      });
+  
+      // Handle the response from the backend if needed
+      console.log("User registration successful:", response.data);
+  
+    } catch (error) {
+      // Handle any errors that occur during the registration process
+      console.error("User registration failed:", error);
+      setError("User registration failed. Please try again.");
+    }
     createUserWithEmailAndPassword(signUpFrom.email, signUpFrom.password);
   };
 
