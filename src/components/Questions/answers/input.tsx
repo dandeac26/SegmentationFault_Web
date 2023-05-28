@@ -11,6 +11,9 @@ type AnswerInputProps = {
   onCreateAnswer: (answer: string) => void;
 };
 
+
+
+
 const AnswerInput: React.FC<AnswerInputProps> = ({
   answer,
   setAnswer,
@@ -32,6 +35,7 @@ const AnswerInput: React.FC<AnswerInputProps> = ({
               {user?.email?.split("@")[0]}
             </span>
           </Text>
+          
           <Textarea
             value={answer}
             onChange={(event) => setAnswer(event.target.value)}

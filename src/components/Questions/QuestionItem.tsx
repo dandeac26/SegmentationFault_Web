@@ -137,6 +137,23 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
           <Text fontSize="12pt" fontWeight={600}>
             {question.title}
           </Text>
+          {/* <Text fontSize="9pt" color="gray.500">
+            {question.tags.map((tag: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactFragment | React.ReactPortal | null | undefined, idx: React.Key | null | undefined) => (
+              <Link href={`/tags/${tag}`} key={idx}>
+                <Text
+                  as="span"
+                  color="brand.400"
+                  _hover={{ textDecoration: "underline", cursor: "pointer" }}
+                >
+                  {tag}
+                  {idx !== question.tags.length - 1 && (
+                    <BsDot style={{ display: "inline-block" }} />
+                  )}
+                </Text>
+              </Link>
+            ))}
+          </Text> */}
+          
           <Text fontSize="10pt">{question.body}</Text>
           {question.imageURL && (
             <Flex justify="center" align="center" p={2}>
