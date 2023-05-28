@@ -64,6 +64,7 @@ const Login: React.FC<LoginProps> = ({ toggleView }) => {
     } catch (error) {
       console.log("error logging in.", error);
     }
+    
   };
 
   
