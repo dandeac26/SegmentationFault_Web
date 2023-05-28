@@ -73,11 +73,7 @@ const Home: NextPage = () => {
         </>
       
       <Center>
-        <Text color="brand.100" width="50%" textAlign="center" align="center">
-          This is currently just the front end and there is no backend. I made
-          it so on the front page you should see top questions ( maybe of the
-          day). in order to create a question press the plus in the navbar.
-        </Text>
+        
       </Center>
       <Flex width="100%">
         <Center width="100%">
@@ -92,7 +88,7 @@ const Home: NextPage = () => {
                   bg: "#2e4f4f",
                 }}
               >
-                Most Upvoted
+                Recent
               </Tab>
               <Tab
                 fontSize={12}
@@ -103,7 +99,7 @@ const Home: NextPage = () => {
                   bg: "#2e4f4f",
                 }}
               >
-                Recent
+                Most Upvoted
               </Tab>
             </TabList>
             <TabPanels>

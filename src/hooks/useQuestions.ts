@@ -17,8 +17,90 @@ import { authModalState } from "@/atoms/AuthModalAtom";
 import { Question, questionState, QuestionVote } from "@/atoms/questionsAtom";
 import { auth, storage } from "@/firebase/clientApp";
 import { useRouter } from "next/router";
+import axios from 'axios';
 
 const useQuestions = () => {
+
+  //useEffect(() => {
+    // const fetchQuestions = async () => {
+    //   try {
+    //     setLoading(true);
+    //     const response = await axios.get('http://localhost:8080/getAll');  // update with your backend URL
+    //     // sort by date
+    //     const sortedQuestions = response.data.sort((a: any, b: any) => {
+    //       return b.date - a.date;
+    //     });
+                
+    //     setQuestionStateValue(prev => ({ ...prev, questions: sortedQuestions }));
+    //   } catch (error) {
+    //     setError('Error fetching questions');
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+
+    // fetchQuestions();
+
+
+
+
+
+
+    const fetchQuestions = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/questions/getAll');
+        if (response.status === 200) {
+          // Sort questions by date, most recent first
+          const sortedQuestions = response.data.sort((a: { date: string | number | Date; }, b: { date: string | number | Date; }) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          setQuestionStateValue((prev) => ({
+            ...prev,
+            questions: sortedQuestions,
+          }));
+        } else {
+          throw new Error('Failed to fetch questions');
+        }
+      } catch (error) {
+        setError('Error fetching questions');
+        console.error("Error fetching questions: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+    // const fetchQuestions = async () => {
+    //   try {
+    //     const response = await axios.get('http://localhost:8080/questions/getAll');
+    //     if (response.status === 200) {
+    //       setQuestionStateValue((prev) => ({
+    //         ...prev,
+    //         questions: response.data,
+    //       }));
+    //     } else {
+    //       throw new Error('Failed to fetch questions');
+    //     }
+    //   } catch (error) {
+    //     setError('Error fetching questions');
+    //     console.error("Error fetching questions: ", error);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+    
+  //}, []);
+
+
   const [user, loadingUser] = useAuthState(auth);
   const [questionStateValue, setQuestionStateValue] =
     useRecoilState(questionState);
@@ -197,17 +279,21 @@ const useQuestions = () => {
     }
   };
 
+  // useEffect(() => {
+  //   // Logout or no authenticated user
+  //   if (!user?.uid && !loadingUser) {
+  //     setQuestionStateValue((prev) => ({
+  //       ...prev,
+  //       questionVotes: [],
+  //     }));
+  //     return;
+  //   }
+  // }, [user, loadingUser]);
   useEffect(() => {
-    // Logout or no authenticated user
-    if (!user?.uid && !loadingUser) {
-      setQuestionStateValue((prev) => ({
-        ...prev,
-        questionVotes: [],
-      }));
-      return;
-    }
-  }, [user, loadingUser]);
-
+    setLoading(true);
+    fetchQuestions();
+  }, []);
+  
   return {
     questionStateValue,
     setQuestionStateValue,

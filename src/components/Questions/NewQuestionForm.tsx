@@ -105,7 +105,13 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user }) => {
     
       const response = await fetch(`http://localhost:8080/users/getByEmail?email=${encodeURIComponent(user.email!)}`);
       const data = await response.json();
-    
+      // make sure data is not null
+      if (data === null) {
+        console.log("data is null");
+        return;
+      }
+
+
       console.log(data);
       if (data && data.userId && data.email) {
         questionData.author_id = data.userId; // Assign the user ID from the response
@@ -137,6 +143,9 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user }) => {
       
       
       setLoading(false);
+
+      // go to index.tsx
+      router.push("/");
     };
 
     // const [pictureUrl, setPictureUrl] = useState<string | null>(null);
