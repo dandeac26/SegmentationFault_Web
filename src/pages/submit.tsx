@@ -38,7 +38,7 @@ const CreateQuestion: NextPage = () => {
     }
   }, [user, loadingUser]);
 
-  console.log("HERE IS USER", user, loadingUser);
+ // console.log("HERE IS USER", user, loadingUser);
 
   return (
     <>
@@ -51,8 +51,9 @@ const CreateQuestion: NextPage = () => {
               </Text>
             </Box>
             {user && <NewQuestionForm user={user} />}
+          </>,
+          <>
           </>
-          
          
       </PageContentLayout>
     </>

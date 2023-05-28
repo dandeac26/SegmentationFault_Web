@@ -60,6 +60,13 @@ const SignUp: React.FC = () => {
       setError("User registration failed. Please try again.");
     }
     createUserWithEmailAndPassword(signUpFrom.email, signUpFrom.password);
+
+    // change modal to login
+    setAuthModalState((prev) => ({
+      ...prev,
+      view: "login",
+    }));
+    
   };
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
