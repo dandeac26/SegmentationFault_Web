@@ -2,6 +2,7 @@ import { atom } from "recoil";
 //import { Timestamp } from "firebase/firestore";
 
 export type Question = {
+  author_id: string;
   tags: any;
   createdAt: any;
   id: string;
