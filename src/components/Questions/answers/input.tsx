@@ -82,7 +82,8 @@ const AnswerInput: React.FC<AnswerInputProps> = ({
           borderColor="gray.100"
           p={4}
         >
-          <Text fontWeight={600}>Log in or sign up to leave a answer</Text>
+          <Text fontWeight={600} fontSize="10pt" color="white"
+            >Log in or sign up to leave a answer</Text>
           <AuthButtons />
         </Flex>
       )}

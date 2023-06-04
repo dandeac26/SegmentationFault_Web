@@ -59,7 +59,7 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user }) => {
   const router = useRouter();
   const setQuestionItems = useSetRecoilState(questionState);
 
-  // handleCreateQuestion sends the question to the spring boot backend using "questions/create"
+ 
 
   /**
     java constuctor for question entity : 
@@ -85,17 +85,26 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user }) => {
       }
     };
 
+    // var tagText = "";
+
+    // const setTags = (e) => {
+    //   tagText = e.target.value;
+    // };
+
+
     
     const handleCreateQuestion = async () => {
       setLoading(true);
     
       const { title, body, tags } = textInputs;
+      // var tagsArray = tagText.split(",").map((tag) => tag.trim());
       const tagsArray = tags.split(",").map((tag) => tag.trim());
+
     
       const questionData = {
         title,
         body,
-        tags: tagsArray,
+        tags : tagsArray,
         votes: 0,
         creation_time: serverTimestamp(),
         picture: selectedFile, // Assign the Base64 string directly

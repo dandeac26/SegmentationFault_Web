@@ -1,14 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Flex,
   Icon,
   Image,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
   Skeleton,
   Spinner,
   Stack,
   Text,
 } from "@chakra-ui/react";
 import moment from "moment";
+import axios from 'axios';
 import { NextRouter } from "next/router";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BsChat, BsDot } from "react-icons/bs";
@@ -22,6 +26,9 @@ import {
 } from "react-icons/io5";
 import { Question } from "@/atoms/questionsAtom";
 import Link from "next/link";
+import { Modal, ModalOverlay } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
+
 
 export type QuestionItemContentProps = {
   question: Question;
@@ -54,6 +61,9 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
   const [loadingImage, setLoadingImage] = useState(true);
   const [loadingDelete, setLoadingDelete] = useState(false);
   const singleQuestionView = !onSelectQuestion; // function not passed to [pid]
+  const { isOpen, onOpen, onClose } = useDisclosure(); // State and functions for controlling the modal
+
+  const [imageUrl, setImageUrl] = useState("");
 
   const handleDelete = async (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -79,6 +89,23 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
     }
   };
 
+  useEffect(() => {
+    const fetchImagePath = async () => {
+      try {
+        console.log("question.id : ", question.id);
+        const response = await axios.get(`http://localhost:8080/questions/getById/${question.id}`);
+        setImageUrl(response.data.picture);
+        console.log('Server Response: ', response); // Print the response
+      } catch (error) {
+        console.error("Error fetching image path", error);
+      }
+    }
+    
+    fetchImagePath();
+  }, [question.id]);
+
+  const imagePath = "/images/applogo1.png";
+  
   return (
     <Flex
       border="1px solid"
@@ -155,20 +182,21 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
           </Text> */}
           
           <Text fontSize="10pt">{question.body}</Text>
-          {question.imageURL && (
+          {imageUrl && (
             <Flex justify="center" align="center" p={2}>
               {loadingImage && (
                 <Skeleton height="200px" width="100%" borderRadius={4} />
               )}
-              <Image
-                // width="80%"
-                // maxWidth="500px"
-                maxHeight="460px"
-                src={question.imageURL}
-                display={loadingImage ? "none" : "unset"}
-                onLoad={() => setLoadingImage(false)}
-                alt="Question Image"
-              />
+              <div onClick={onOpen} style={{ cursor: "zoom-in" }}>
+                <Image
+                  maxHeight="460px"
+                  src={imageUrl}
+                  display={loadingImage ? "none" : "unset"}
+                  onLoad={() => setLoadingImage(false)}
+                  alt="Question Image"
+                  borderRadius="lg"
+                />
+              </div>
             </Flex>
           )}
         </Stack>

@@ -8,7 +8,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-//import { Timestamp } from "firebase/firestore";
+//import { Timestamp } from "firebase/co";
 import moment from "moment";
 import { HiOutlineCode } from "react-icons/hi";
 import {

@@ -59,6 +59,8 @@ const Home: NextPage = () => {
       });
   }, []);
 
+  const imagePath = "/images/applogo1.png"; 
+
   return (
     <>
       <Image src="https://i.imgur.com/vaHaOhq.png" borderRadius="lg" />
@@ -77,7 +79,9 @@ const Home: NextPage = () => {
       </Center>
       <Flex width="100%">
         <Center width="100%">
+        
           <Tabs size="md" variant="enclosed" width="100%">
+          {/* <Image src={imagePath} alt="My Image" borderRadius="lg" /> */}
             <TabList>
               <Tab
                 fontSize={12}
