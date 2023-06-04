@@ -9,7 +9,9 @@ import {
   Textarea,
   Image,
 } from "@chakra-ui/react";
+
 import { User } from "firebase/auth";
+
 import {
   addDoc,
   collection,

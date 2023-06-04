@@ -1,15 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Flex, Image } from "@chakra-ui/react";
 import SearchInput from "./SearchInput";
 import RightContent from "./rightContent/RightContent";
-import { auth } from "@/firebase/clientApp";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
+import { User, UserContext, UserProvider } from "@/pages/userContext";
 
 const Navbar: React.FC = () => {
-  const [user, loading, error] = useAuthState(auth);
   const router = useRouter();
+  const user = null; // Update with the appropriate user value from your UserContext
+  const { currentUser } = useContext(UserContext) as { currentUser: User | null };
+  console.log("this should be the user", currentUser)
   return (
+    
+      
     <Flex
       bg="brand.900"
       height="45px"
@@ -40,8 +43,10 @@ const Navbar: React.FC = () => {
         />
       </Flex>
       <SearchInput />
-      <RightContent user={user} />
+      <RightContent user={currentUser} />
     </Flex>
+
   );
-}; // this is a comment
+};
+
 export default Navbar;

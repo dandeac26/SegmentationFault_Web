@@ -1,22 +1,22 @@
-import React, { useEffect } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import React, { useEffect, useContext } from "react";
 import { useRouter } from "next/router";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { Question } from "@/atoms/questionsAtom";
 import PageContentLayout from "@/components/layout/PageContent";
 import Answers from "@/components/Questions/answers";
 import QuestionLoader from "@/components/Questions/Loader";
 import QuestionItem from "@/components/Questions/QuestionItem";
-import { auth } from "@/firebase/clientApp";
 import useQuestions from "@/hooks/useQuestions";
+import { UserContext } from "../userContext"; // adjust the path as needed
 
 type QuestionPageProps = {};
 
 const QuestionPage: React.FC<QuestionPageProps> = () => {
-  const [user] = useAuthState(auth);
+  const userContext = useContext(UserContext);
+  const currentUser = userContext ? userContext.currentUser : null;
+  const setCurrentUser = userContext ? userContext.setCurrentUser : null;
+  
   const router = useRouter();
 
-  // Need to pass community data here to see if current question [pid] has been voted on
   const {
     questionStateValue,
     setQuestionStateValue,
@@ -28,31 +28,11 @@ const QuestionPage: React.FC<QuestionPageProps> = () => {
 
   const fetchQuestion = async (qid: string) => {
     console.log("FETCHING POST");
-
     setLoading(true);
-    try {
-      //const questionDocRef = doc(firestore, "questions", qid);
-      //const questionDoc = await getDoc(questionDocRef);
-      // setQuestionStateValue((prev) => ({
-      //   ...prev,
-      //   selectedQuestion: {
-      //     id: questionDoc.id,
-      //     ...questionDoc.data(),
-      //   } as Question,
-      // }));
-
-
-      // setQuestionStateValue((prev) => ({
-      //   ...prev,
-      //   selectedQuestion: {} as Question,
-      // }));
-    } catch (error: any) {
-      console.log("fetchQuestion error", error.message);
-    }
+    // Fetch your question data here using your custom function or API
     setLoading(false);
   };
 
-  // Fetch question if not in already in state
   useEffect(() => {
     const { qid = "" } = router.query;
 
@@ -73,7 +53,6 @@ const QuestionPage: React.FC<QuestionPageProps> = () => {
               <>
                 <QuestionItem
                   question={questionStateValue.selectedQuestion}
-                  // questionIdx={questionStateValue.selectedQuestion.questionIdx}
                   onVote={onVote}
                   onDeleteQuestion={onDeleteQuestion}
                   userVoteValue={
@@ -84,12 +63,12 @@ const QuestionPage: React.FC<QuestionPageProps> = () => {
                     )?.voteValue
                   }
                   userIsCreator={
-                    user?.uid === questionStateValue.selectedQuestion.creatorId
+                    currentUser?.id === questionStateValue.selectedQuestion.creatorId
                   }
                   router={router}
                 />
                 <Answers
-                  user={user}
+                  user={currentUser}
                   selectedQuestion={questionStateValue.selectedQuestion}
                 />
               </>

@@ -1,13 +1,13 @@
 import React, { MouseEventHandler, useState } from "react";
 import { Flex, Textarea, Button, Text } from "@chakra-ui/react";
-import { User } from "firebase/auth";
+import { User } from "@/pages/userContext";
 import AuthButtons from "@/components/layout/navbar/rightContent/AuthButtons";
 
 type AnswerInputProps = {
   answer: string;
   setAnswer: (value: string) => void;
   loading: boolean;
-  user?: User | null;
+  user: User | null;
   onCreateAnswer: (answer: string) => void;
 };
 

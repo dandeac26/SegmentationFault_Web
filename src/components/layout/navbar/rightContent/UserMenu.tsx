@@ -11,8 +11,8 @@ import {
   MenuDivider,
   Box,
 } from "@chakra-ui/react";
-import { Auth, User, signOut } from "firebase/auth";
-import React from "react";
+import { Auth, signOut } from "firebase/auth";
+import React, { useContext, useState } from "react";
 import { MdAccountBox } from "react-icons/md";
 import { VscAccount } from "react-icons/vsc";
 import { CgProfile } from "react-icons/cg";
@@ -22,6 +22,10 @@ import { useSetRecoilState } from "recoil";
 import { authModalState } from "@/atoms/AuthModalAtom";
 import { IoSparkles } from "react-icons/io5";
 import { useRouter } from "next/router";
+//import { User, UserContext, UserContextType } from "@/pages/userContext";
+  
+import { User, UserContext, UserContextType} from "@/pages/userContext";
+
 
 type UserMenuProps = {
   user?: User | null;
@@ -29,6 +33,21 @@ type UserMenuProps = {
 
 const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
   const setAuthModalState = useSetRecoilState(authModalState);
+
+  //const router = useRouter();
+
+  // setCurrentUser
+  const { setCurrentUser } = useContext(UserContext) as UserContextType;
+
+
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // Perform logout actions here
+    setCurrentUser(null);
+    router.push("/"); // Redirect to login page after logout
+    console.log("this hsould be nullttttt", user);
+  };
 
   return (
     <Menu>
@@ -59,7 +78,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
                   mr={8}
                 >
                   <Text fontWeight={700} color="brand.300">
-                    {user?.displayName || user?.email?.split("@")[0]}
+                    {/* {user?.displayName || user?.email?.split("@")[0]} */}
+                    {user?.email?.split("@")[0]}
                   </Text>
                   <Flex alignItems="center">
                     <Icon as={IoSparkles} color="brand.100" mr={1} />
@@ -102,7 +122,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
                 bg: "brand.300",
                 color: "brand.400",
               }}
-              onClick={() => signOut(auth)}
+              onClick={handleLogout}
             >
               <Flex align="center">
                 <Icon fontSize={20} mr={2} as={MdOutlineLogin} />

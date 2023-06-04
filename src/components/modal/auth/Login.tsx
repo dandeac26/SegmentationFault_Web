@@ -1,37 +1,43 @@
+// import { ModalView, authModalState } from "@/atoms/AuthModalAtom";
+// import { Button, Flex, Input, Text } from "@chakra-ui/react";
+// import React, { useState, useContext } from "react";
+// import { useSetRecoilState } from "recoil";
+// import { UserContext, UserContextType } from "@/pages/userContext";
+
 import { ModalView, authModalState } from "@/atoms/AuthModalAtom";
 import { auth } from "@/firebase/clientApp";
 import { FIREBASE_ERRORS } from "@/firebase/error";
 import { Button, Flex, Input, Text } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { useSetRecoilState } from "recoil";
+import { UserContext, UserContextType } from "@/pages/userContext";
+
 
 type LoginProps = {
   toggleView: (view: ModalView) => void;
 };
 
 const Login: React.FC<LoginProps> = ({ toggleView }) => {
-  
+
+  const userContext = useContext(UserContext) as UserContextType;
+
+  //const { setCurrentUser } = useContext(UserContext);
   const setAuthModalState = useSetRecoilState(authModalState);
   
   const [loginFrom, setLoginForm] = useState({
     email: "",
     password: "",
   });
-
   const [
     signInWithEmailAndPassword,
     user,
     loading,
     error,
   ] = useSignInWithEmailAndPassword(auth);
-  
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    // Hash the password
-    //const hashedPassword = bcrypt.hashSync(loginFrom.password, 10);
 
     try{
       // send login data to the backend API
@@ -45,31 +51,28 @@ const Login: React.FC<LoginProps> = ({ toggleView }) => {
           password: loginFrom.password
         })
       });
-      //console.log(hashedPassword);
+
       const data = await response.json();
+      
       console.log(data);
+      console.log(data.id);
       if(data.status === 'ok'){
         // set the user in the auth state
         setAuthModalState({
           open: false,
           view: "login",
         });
+        userContext.setCurrentUser({
+          id: data.id,
+          email: data.email,
+        });
+        
       }
     } catch (error) {
       console.log("error logging in.", error);
     }
-    
-    try {
-      await signInWithEmailAndPassword(loginFrom.email, loginFrom.password);
-    } catch (error) {
-      console.log("error logging in.", error);
-    }
-    
   };
 
-  
-  
-  
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLoginForm(prev => ({
       ...prev,
@@ -77,15 +80,14 @@ const Login: React.FC<LoginProps> = ({ toggleView }) => {
     }))
   }
 
-
   return  (
     <form onSubmit={onSubmit}>
-      <Input 
+      <Input
         required
-        name="email" 
-        placeholder="email" 
-        type="email" 
-        mb={2} 
+        name="email"
+        placeholder="email"
+        type="email"
+        mb={2}
         onChange={onChange}
         fontSize='10pt'
         _placeholder={{
@@ -104,7 +106,7 @@ const Login: React.FC<LoginProps> = ({ toggleView }) => {
         }}
         bg="gray.50"
       />
-      <Input 
+      <Input
         required
         name = "password"
         placeholder="password"
@@ -131,9 +133,9 @@ const Login: React.FC<LoginProps> = ({ toggleView }) => {
       <Text textAlign="center" color="red" fontSize="10pt">
         {FIREBASE_ERRORS[error?.message as keyof typeof FIREBASE_ERRORS]}
       </Text>
-      <Button 
+      <Button
         type="submit"
-        width="100%" 
+        width="100%"
         height="36px"
         isLoading={loading}
         mt={2}
@@ -155,12 +157,12 @@ const Login: React.FC<LoginProps> = ({ toggleView }) => {
       </Flex>
       <Flex fontSize='9pt' justifyContent='center' mt={3}>
         <Text mr={1}>New here?</Text>
-        <Text 
-          color="brand.300" 
-          fontWeight={700} 
+        <Text
+          color="brand.300"
+          fontWeight={700}
           cursor="pointer"
-          onClick={() => toggleView("signup")}     
-        > 
+          onClick={() => toggleView("signup")}
+        >
           SIGN UP
         </Text>
 

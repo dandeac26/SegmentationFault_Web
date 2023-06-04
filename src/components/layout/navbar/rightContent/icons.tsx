@@ -11,8 +11,11 @@ import { AiOutlinePlus } from "react-icons/ai";
 import router, { useRouter } from "next/router";
 import { authModalState } from "@/atoms/AuthModalAtom";
 import { useSetRecoilState } from "recoil";
-import { User } from "firebase/auth";
+//import { User } from "firebase/auth";
 //import useDirectory from "@/hooks/useDirectory";
+import { User } from "@/pages/userContext";
+
+
 type iconsProps = {
   user?: User | null;
 };

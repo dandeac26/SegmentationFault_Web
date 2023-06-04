@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   Flex,
   Icon,
   Image,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
   Skeleton,
   Spinner,
   Stack,
   Text,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalCloseButton,
+  ModalBody,
 } from "@chakra-ui/react";
 import moment from "moment";
-import axios from 'axios';
+import axios from "axios";
 import { NextRouter } from "next/router";
 import { AiOutlineDelete } from "react-icons/ai";
 import { BsChat, BsDot } from "react-icons/bs";
@@ -26,11 +29,12 @@ import {
 } from "react-icons/io5";
 import { Question } from "@/atoms/questionsAtom";
 import Link from "next/link";
-import { Modal, ModalOverlay } from "@chakra-ui/react";
-import { useDisclosure } from "@chakra-ui/react";
+import { UserContext, UserContextType } from "@/pages/userContext";
 
 
 export type QuestionItemContentProps = {
+
+  
   question: Question;
   onVote: (
     event: React.MouseEvent<SVGElement, MouseEvent>,
@@ -47,6 +51,8 @@ export type QuestionItemContentProps = {
   homePage?: boolean;
 };
 
+
+
 const QuestionItem: React.FC<QuestionItemContentProps> = ({
   question,
   questionIdx,
@@ -55,15 +61,66 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
   router,
   onDeleteQuestion,
   userVoteValue,
-  userIsCreator,
   homePage,
 }) => {
   const [loadingImage, setLoadingImage] = useState(true);
   const [loadingDelete, setLoadingDelete] = useState(false);
   const singleQuestionView = !onSelectQuestion; // function not passed to [pid]
+  const [imageUrl, setImageUrl] = useState("");
+  const [questionData, setQuestionData] = useState<Question>({} as Question);
   const { isOpen, onOpen, onClose } = useDisclosure(); // State and functions for controlling the modal
 
-  const [imageUrl, setImageUrl] = useState("");
+  const imageRef = useRef<HTMLImageElement>(null);
+  const userContext = useContext(UserContext) as UserContextType;
+
+  const handleImageLoad = () => {
+    setLoadingImage(false);
+  };
+
+  // const resizeImage = () => {
+  //   if (imageRef.current) {
+  //     const modalWidth = window.innerWidth * 0.8; // Adjust the width as desired
+  //     const modalHeight = window.innerHeight * 0.8; // Adjust the height as desired
+  
+  //     const imageWidth = imageRef.current.naturalWidth;
+  //     const imageHeight = imageRef.current.naturalHeight;
+  
+  //     const widthRatio = modalWidth / imageWidth;
+  //     const heightRatio = modalHeight / imageHeight;
+  
+  //     const scaleFactor = Math.min(widthRatio, heightRatio);
+  
+  //     const newWidth = imageWidth * scaleFactor;
+  //     const newHeight = imageHeight * scaleFactor;
+  
+  //     imageRef.current.style.maxWidth = `${newWidth}px`;
+  //     imageRef.current.style.maxHeight = `${newHeight}px`;
+  //     imageRef.current.style.width = "auto";
+  //     imageRef.current.style.height = "auto";
+  //     imageRef.current.style.objectFit = "contain";
+  //   }
+  // };
+
+  const resizeImage = () => {
+    if (imageRef.current) {
+      const modalContent = document.querySelector(".chakra-modal__content") as HTMLElement;
+      if (modalContent) {
+        const modalWidth = imageRef.current.offsetWidth;
+        const modalHeight = imageRef.current.offsetHeight;
+  
+        modalContent.style.width = `${modalWidth}px`;
+        modalContent.style.height = `${modalHeight}px`;
+        modalContent.style.display = "flex";
+        modalContent.style.justifyContent = "center";
+        modalContent.style.alignItems = "center";
+      }
+    }
+  };
+  
+  
+  
+  
+  
 
   const handleDelete = async (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -80,12 +137,7 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
       if (router) router.back();
     } catch (error: any) {
       console.log("Error deleting question", error.message);
-      /**
-       * Don't need to setLoading false if no error
-       * as item will be removed from DOM
-       */
       setLoadingDelete(false);
-      // setError
     }
   };
 
@@ -93,19 +145,41 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
     const fetchImagePath = async () => {
       try {
         console.log("question.id : ", question.id);
-        const response = await axios.get(`http://localhost:8080/questions/getById/${question.id}`);
+        const response = await axios.get(
+          `http://localhost:8080/questions/getById/${question.id}`
+        );
         setImageUrl(response.data.picture);
-        console.log('Server Response: ', response); // Print the response
+        setQuestionData(response.data);
+        console.log("Question Data: ", questionData.creatorId);
+        console.log("Server Response: ", response); // Print the response
       } catch (error) {
         console.error("Error fetching image path", error);
       }
-    }
-    
+    };
+
     fetchImagePath();
   }, [question.id]);
 
-  const imagePath = "/images/applogo1.png";
+  useEffect(() => {
+    window.addEventListener("resize", resizeImage);
+
+    return () => {
+      window.removeEventListener("resize", resizeImage);
+    };
+  }, []);
+
+
+  const [userIsCreator, setUserIsCreator] = useState(false);
+
+
+  useEffect(() => {
+    if (question && userContext.currentUser) {
+      setUserIsCreator(question.createdAt === userContext.currentUser);
+    }
+  }, [question, userContext.currentUser]);
   
+
+  console.log("is Creator: ", userIsCreator);
   return (
     <Flex
       border="1px solid"
@@ -164,39 +238,32 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
           <Text fontSize="12pt" fontWeight={600}>
             {question.title}
           </Text>
-          {/* <Text fontSize="9pt" color="gray.500">
-            {question.tags.map((tag: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactFragment | React.ReactPortal | null | undefined, idx: React.Key | null | undefined) => (
-              <Link href={`/tags/${tag}`} key={idx}>
-                <Text
-                  as="span"
-                  color="brand.400"
-                  _hover={{ textDecoration: "underline", cursor: "pointer" }}
-                >
-                  {tag}
-                  {idx !== question.tags.length - 1 && (
-                    <BsDot style={{ display: "inline-block" }} />
-                  )}
-                </Text>
-              </Link>
-            ))}
-          </Text> */}
-          
           <Text fontSize="10pt">{question.body}</Text>
           {imageUrl && (
             <Flex justify="center" align="center" p={2}>
               {loadingImage && (
                 <Skeleton height="200px" width="100%" borderRadius={4} />
               )}
-              <div onClick={onOpen} style={{ cursor: "zoom-in" }}>
-                <Image
-                  maxHeight="460px"
-                  src={imageUrl}
-                  display={loadingImage ? "none" : "unset"}
-                  onLoad={() => setLoadingImage(false)}
-                  alt="Question Image"
-                  borderRadius="lg"
-                />
-              </div>
+              <Image
+                src={imageUrl}
+                alt="Question Image"
+                borderRadius="lg"
+                onLoad={handleImageLoad}
+                ref={imageRef}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onOpen();
+                }}
+                //onClick={onOpen}
+                style={{
+                  cursor: "zoom-in",
+                  objectFit: "cover",
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  width: "auto",
+                  height: "auto",
+                }}
+              />
             </Flex>
           )}
         </Stack>
@@ -252,6 +319,37 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
           )}
         </Flex>
       </Flex>
+
+      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+        <ModalOverlay />
+        <ModalContent
+            maxW="none"
+            maxH="none"
+            w="auto"
+            h="auto"
+            overflow="hidden"
+          >
+
+          <ModalCloseButton />
+          <ModalBody>
+            <Flex justify="center" align="center" h="80vh" >
+            <Image
+              src={imageUrl}
+              alt="Question Image"
+              borderRadius="lg"
+              ref={imageRef}
+              onLoad={resizeImage}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+              }}
+            />
+
+            </Flex>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Flex>
   );
 };
