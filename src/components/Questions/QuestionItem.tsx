@@ -77,29 +77,6 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
     setLoadingImage(false);
   };
 
-  // const resizeImage = () => {
-  //   if (imageRef.current) {
-  //     const modalWidth = window.innerWidth * 0.8; // Adjust the width as desired
-  //     const modalHeight = window.innerHeight * 0.8; // Adjust the height as desired
-  
-  //     const imageWidth = imageRef.current.naturalWidth;
-  //     const imageHeight = imageRef.current.naturalHeight;
-  
-  //     const widthRatio = modalWidth / imageWidth;
-  //     const heightRatio = modalHeight / imageHeight;
-  
-  //     const scaleFactor = Math.min(widthRatio, heightRatio);
-  
-  //     const newWidth = imageWidth * scaleFactor;
-  //     const newHeight = imageHeight * scaleFactor;
-  
-  //     imageRef.current.style.maxWidth = `${newWidth}px`;
-  //     imageRef.current.style.maxHeight = `${newHeight}px`;
-  //     imageRef.current.style.width = "auto";
-  //     imageRef.current.style.height = "auto";
-  //     imageRef.current.style.objectFit = "contain";
-  //   }
-  // };
 
   const resizeImage = () => {
     if (imageRef.current) {
@@ -118,10 +95,6 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
   };
   
   
-  
-  
-  
-
   const handleDelete = async (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
@@ -173,13 +146,20 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
 
 
   useEffect(() => {
+    //console.log("userContext.currentUser: ", userContext.currentUser.id + ' ' +  question.creatorId);
+    if(userContext.currentUser) console.log("userContext.currentUser.id: ", userContext.currentUser.id);
+    //console.log("question.creatorId : ", question.creatorId);
+    //console.log("here is quest", question)
     if (question && userContext.currentUser) {
-      setUserIsCreator(question.createdAt === userContext.currentUser);
+      setUserIsCreator(question.author_id === userContext.currentUser.id);
+      
+    } else {
+      setUserIsCreator(false);
     }
   }, [question, userContext.currentUser]);
   
+  
 
-  console.log("is Creator: ", userIsCreator);
   return (
     <Flex
       border="1px solid"
@@ -198,7 +178,7 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
         align="center"
         bg={singleQuestionView ? "none" : "#b0d3cb"}
         p={2}
-        width="40px"
+        width="30px"
         borderRadius={singleQuestionView ? "0" : "3px 0px 0px 3px"}
       >
         <Icon
@@ -225,7 +205,7 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
           onClick={(event) => onVote(event, question, -1)}
         />
       </Flex>
-      <Flex direction="column" width="100%" bg="brand.400">
+      <Flex direction="column" width="100%" bg="brand.400" maxHeight="500" overflow="auto">
         <Stack spacing={1} p="10px 10px">
           {question.createdAt && (
             <Stack direction="row" spacing={0.6} align="center" fontSize="9pt">
@@ -240,7 +220,7 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
           </Text>
           <Text fontSize="10pt">{question.body}</Text>
           {imageUrl && (
-            <Flex justify="center" align="center" p={2}>
+            <Flex justify="center" align="center" p={2} >
               {loadingImage && (
                 <Skeleton height="200px" width="100%" borderRadius={4} />
               )}

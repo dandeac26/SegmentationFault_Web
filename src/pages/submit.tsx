@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import PageContentLayout from "@/components/layout/PageContent";
 import NewQuestionForm from "@/components/Questions/NewQuestionForm";
@@ -23,20 +23,22 @@ import NextLink from "next/link";
 import { Link } from "@chakra-ui/react";
 import { IoHome } from "react-icons/io5";
 import { BsFillQuestionCircleFill } from "react-icons/bs";
+import { User, UserContext } from "@/pages/userContext";
 
 const CreateQuestion: NextPage = () => {
-  const [user, loadingUser, error] = useAuthState(auth);
+  //const [ loadingUser, error] = useAuthState(auth);
   const router = useRouter();
-
+  const { currentUser } = useContext(UserContext) as { currentUser: User | null };
   /**
    * Not sure why not working
    * Attempting to redirect user if not authenticated
    */
   useEffect(() => {
-    if (!user && !loadingUser) {
+    console.log("this is in submit", currentUser);
+    if (!currentUser) {
       router.push(`/`);
     }
-  }, [user, loadingUser]);
+  }, [currentUser]);
 
  // console.log("HERE IS USER", user, loadingUser);
 
@@ -50,7 +52,7 @@ const CreateQuestion: NextPage = () => {
                 Create a question
               </Text>
             </Box>
-            {user && <NewQuestionForm user={user} />}
+            {currentUser && <NewQuestionForm user={currentUser} />}
           </>,
           <>
           </>

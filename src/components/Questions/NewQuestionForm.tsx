@@ -10,7 +10,7 @@ import {
   Image,
 } from "@chakra-ui/react";
 
-import { User } from "firebase/auth";
+import { User } from "@/pages/userContext";
 
 import {
   addDoc,
@@ -95,14 +95,15 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user }) => {
 
 
     
+    
     const handleCreateQuestion = async () => {
       setLoading(true);
-    
+
       const { title, body, tags } = textInputs;
       // var tagsArray = tagText.split(",").map((tag) => tag.trim());
       const tagsArray = tags.split(",").map((tag) => tag.trim());
 
-    
+
       const questionData = {
         title,
         body,
@@ -113,7 +114,7 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user }) => {
         author_id: "", // Placeholder for user ID
         author: "", // Placeholder for author name
       };
-    
+
       const response = await fetch(`http://localhost:8080/users/getByEmail?email=${encodeURIComponent(user.email!)}`);
       const data = await response.json();
       // make sure data is not null
@@ -128,7 +129,7 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user }) => {
         questionData.author_id = data.userId; // Assign the user ID from the response
         questionData.author = data.email.split("@")[0]; // Assign the author name
       }
-    
+
       try {
         const response = await fetch("http://localhost:8080/questions/create", {
           method: "POST",
@@ -151,13 +152,15 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user }) => {
         console.log("createQuestion error", error);
         setError("Error creating question");
       }
-      
-      
+
+
       setLoading(false);
 
       // go to index.tsx
       router.push("/");
     };
+
+    
 
     // const [pictureUrl, setPictureUrl] = useState<string | null>(null);
 

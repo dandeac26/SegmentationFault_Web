@@ -26,10 +26,12 @@ const icons: React.FC<iconsProps> = ({ user }) => {
 
   const router = useRouter();
   const createQuestion = () => {
+    console.log("this is in create question", user);
     if (!user) {
       setAuthModalState({ open: true, view: "login" });
       return;
     }
+    console.log("here should go to submit");
     router.push(`/submit`);
   };
   return (
