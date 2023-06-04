@@ -98,7 +98,8 @@ const QuestionPage: React.FC<QuestionPageProps> = () => {
         )}
       </>
       {/* Right Content */}
-      <></>
+      <>
+      </>
     </PageContentLayout>
   );
 };
