@@ -7,7 +7,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { User } from "firebase/auth";
+//import { User } from "firebase/auth";
 // import {
 //   collection,
 //   doc,
@@ -25,9 +25,10 @@ import { Question, questionState } from "../../../atoms/questionsAtom";
 import { firestore } from "../../../firebase/clientApp";
 import AnswerItem, { Answer } from "./AnswerItem";
 import AnswerInput from "./input";
+import { User } from "@/pages/userContext";
 
 type AnswersProps = {
-  user?: User | null;
+  user: User | null;
   selectedQuestion: Question;
 };
 
@@ -73,9 +74,9 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
       setAnswers((prev) => [
         {
           // id: answerDocRef.id,
-          creatorId: user.uid,
+          creatorId: user.id,
           creatorDisplayText: user.email!.split("@")[0],
-          creatorPhotoURL: user.photoURL,
+          //creatorPhotoURL: user.photoURL,
           questionId,
           questionTitle: title,
           text: answer,
@@ -205,7 +206,7 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
                     answer={item}
                     onDeleteAnswer={onDeleteAnswer}
                     isLoading={deleteLoading === (item.id as string)}
-                    userId={user?.uid}
+                    userId={user?.id}
                   />
                 ))}
               </>
