@@ -177,8 +177,9 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user, question, isEdi
       setLoading(true);
       console.log("handleCreateOrUpdateQuestion");
       const { title, body, tags } = textInputs;
+
       const tagsArray = tags.split(",").map((tag: string) => tag.trim());
-    
+      
       // const questionData = {
       //   id,
       //   title,
