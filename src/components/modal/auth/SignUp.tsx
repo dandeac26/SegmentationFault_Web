@@ -6,7 +6,7 @@ import { useSetRecoilState } from "recoil";
 import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { FIREBASE_ERRORS } from "@/firebase/error";
 import bcrypt from "bcryptjs";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 const SignUp: React.FC = () => {
   const setAuthModalState = useSetRecoilState(authModalState);
@@ -16,7 +16,7 @@ const SignUp: React.FC = () => {
     password: "",
     confirmPassword: "",
   });
-  const [error, setError] = useState("");
+  const [errorr, setError] = useState("");
   const [createUserWithEmailAndPassword, user, loading, userError] =
     useCreateUserWithEmailAndPassword(auth); /// this is from the firebase clientapp
 
@@ -31,15 +31,15 @@ const SignUp: React.FC = () => {
   //   // passwd match
   //   createUserWithEmailAndPassword(signUpFrom.email, signUpFrom.password);
   // };
-
+  const [errorMessage, setErrorMessage] = useState("");
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (error) setError("");
+    if (errorr) setError("");
     if (signUpFrom.password !== signUpFrom.confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-  
+    setError("Can not use that email");
     try {
       // Hash the password
       const hashedPassword = await bcrypt.hash(signUpFrom.password, 10);
@@ -50,22 +50,34 @@ const SignUp: React.FC = () => {
         email: signUpFrom.email,
         password: hashedPassword,
       });
-  
-      // Handle the response from the backend if needed
-      console.log("User registration successful:", response.data);
-  
-    } catch (error) {
-      // Handle any errors that occur during the registration process
-      console.error("User registration failed:", error);
-      setError("User registration failed. Please try again.");
-    }
-    createUserWithEmailAndPassword(signUpFrom.email, signUpFrom.password);
 
-    // change modal to login
+      setError("");
+      if (response.status !== 200) {
+        // Set the error state to the error message returned by the backend
+        setError(response.data);
+        return;
+    }
     setAuthModalState((prev) => ({
       ...prev,
       view: "login",
     }));
+    // If the status code is 200, the registration was successful
+    console.log("User registration successful:", response.data);
+    createUserWithEmailAndPassword(signUpFrom.email, signUpFrom.password);
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const serverMessage = error.response?.data;
+          setError(serverMessage || "An error occurred while processing your request.");
+        } else {
+          setError("User registration failed. Please try again.");
+        }
+    }
+      
+    
+    
+
+    // change modal to login
+    
     
   };
 
@@ -151,10 +163,7 @@ const SignUp: React.FC = () => {
         bg="gray.50"
       />
 
-      <Text textAlign="center" color="red" fontSize="10pt">
-        {error ||
-          FIREBASE_ERRORS[userError?.message as keyof typeof FIREBASE_ERRORS]}
-      </Text>
+      
 
       <Button
         type="submit"
@@ -165,7 +174,9 @@ const SignUp: React.FC = () => {
       >
         Sign Up
       </Button>
-
+      <Text textAlign="center" color="red" fontSize="10pt">
+        {errorr}
+      </Text>
       <Flex fontSize="9pt" justifyContent="center" mt={3}>
         <Text mr={1}>Already have an account?</Text>
         <Text

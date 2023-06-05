@@ -117,14 +117,18 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
   useEffect(() => {
     const fetchImagePath = async () => {
       try {
-        console.log("question.id : ", question.id);
+        //console.log("question.id : ", question.id);
         const response = await axios.get(
           `http://localhost:8080/questions/getById/${question.id}`
         );
         setImageUrl(response.data.picture);
         setQuestionData(response.data);
-        console.log("Question Data: ", questionData.creatorId);
-        console.log("Server Response: ", response); // Print the response
+        // if(userContext.currentUser != null){
+        //   setUserIsCreator(String(question.author_id)=== String(userContext.currentUser.id));
+          
+        // }
+          
+        
       } catch (error) {
         console.error("Error fetching image path", error);
       }
@@ -132,6 +136,9 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
 
     fetchImagePath();
   }, [question.id]);
+  useEffect(() => {
+    console.log("Question Data creator Id(outside in useeffect): ", questionData.creatorId);
+  }, [questionData]);
 
   useEffect(() => {
     window.addEventListener("resize", resizeImage);
@@ -144,21 +151,67 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
 
   const [userIsCreator, setUserIsCreator] = useState(false);
 
+//   const [dataReady, setDataReady] = useState(false);
 
-  useEffect(() => {
-    //console.log("userContext.currentUser: ", userContext.currentUser.id + ' ' +  question.creatorId);
-    if(userContext.currentUser) console.log("userContext.currentUser.id: ", userContext.currentUser.id);
-    //console.log("question.creatorId : ", question.creatorId);
-    //console.log("here is quest", question)
-    if (question && userContext.currentUser) {
-      setUserIsCreator(question.author_id === userContext.currentUser.id);
-      
-    } else {
-      setUserIsCreator(false);
-    }
-  }, [question, userContext.currentUser]);
+// useEffect(() => {
+//   if (userContext.currentUser && questionData.creatorId) {
+//     setDataReady(true);
+//   }
+// }, [userContext.currentUser, questionData.creatorId]);
+
+// useEffect(() => {
+//     if (!dataReady) {
+//       return; // Skip execution if currentUser or creatorId is not available
+//     }
+//     if(userContext.currentUser)
+//       setUserIsCreator(question.author_id === userContext.currentUser.id);
+//     console.log("userIsCreator (inside useEffect): ", userIsCreator);
+//   }, [question, userContext.currentUser, dataReady]);
+
+  // useEffect(() => {
+  //   //console.log("looking for why you don't work", userContext);
+    
+  //   if (!userContext.currentUser) {
+  //     return; // Skip execution if currentUser is not available
+  //   }
+    
+  //   //console.log("userContext.currentUser.id: ", userContext.currentUser.id);
+  //   //console.log("here is question.author_id", question.author_id);
+  
+  //   setUserIsCreator(String(question.author_id) === String(userContext.currentUser.id));
+  //   //console.log("userIsCreator (inside useEffect): ", userIsCreator);
+  // }, [question, userContext.currentUser]);
   
   
+  // useEffect(() => {
+  //   console.log("userIsCreator (outside useEffect): ", userIsCreator);
+  // }, [userIsCreator]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+useEffect(() => {
+  if (userContext.currentUser) {
+    setIsLoggedIn(true);
+  } else {
+    setIsLoggedIn(false);
+  }
+}, [userContext.currentUser]);
+
+useEffect(() => {
+  if(userContext.currentUser == null) {
+    setUserIsCreator(false);
+    return;
+  }
+  if (!userContext.currentUser || !questionData.author_id) {
+    return; // Skip execution if currentUser or creatorId is not available
+  }
+
+  setUserIsCreator(String(question.author_id) === String(userContext.currentUser.id));
+}, [questionData, userContext.currentUser, isLoggedIn]); // Include isLoggedIn as a dependency
+
+ useEffect(() => {
+    console.log("userIsCreator (outside useEffect): ", userIsCreator);
+  }, [userIsCreator]);
+
 
   return (
     <Flex

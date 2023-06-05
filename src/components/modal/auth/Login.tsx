@@ -36,6 +36,8 @@ const Login: React.FC<LoginProps> = ({ toggleView }) => {
     error,
   ] = useSignInWithEmailAndPassword(auth);
 
+  const [errorMessage, setErrorMessage] = useState("");
+
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -53,7 +55,14 @@ const Login: React.FC<LoginProps> = ({ toggleView }) => {
       });
 
       const data = await response.json();
-      
+       // Check if JWT exists in response
+       console.log("data.token", data.token);
+       if (data.token) {
+        // Store JWT in local storage
+        localStorage.setItem('token', data.token);
+      } else {
+        console.log("No JWT found in response.");
+      }
       console.log(data);
       console.log(data.id);
       if(data.status === 'ok'){
@@ -67,6 +76,9 @@ const Login: React.FC<LoginProps> = ({ toggleView }) => {
           email: data.email,
         });
         
+        
+      }else if(data.status === 'error'){
+        setErrorMessage(data.message);
       }
     } catch (error) {
       console.log("error logging in.", error);
@@ -131,7 +143,7 @@ const Login: React.FC<LoginProps> = ({ toggleView }) => {
         bg="gray.50"
       />
       <Text textAlign="center" color="red" fontSize="10pt">
-        {FIREBASE_ERRORS[error?.message as keyof typeof FIREBASE_ERRORS]}
+        {errorMessage}
       </Text>
       <Button
         type="submit"
