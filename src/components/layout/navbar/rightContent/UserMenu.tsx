@@ -33,7 +33,7 @@ type UserMenuProps = {
 
 const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
   const setAuthModalState = useSetRecoilState(authModalState);
-
+  const [userIsCreator, setUserIsCreator] = useState(false);
   //const router = useRouter();
 
   // setCurrentUser
@@ -44,8 +44,16 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
 
   const handleLogout = () => {
     // Perform logout actions here
+    console.log("should be removing token here")
+    localStorage.removeItem('token');
     setCurrentUser(null);
     router.push("/"); // Redirect to login page after logout
+    //set modal state to login
+    
+    signOut(auth);
+    //window.location.reload();
+    setAuthModalState({ open: true, view: "login" });
+    
     console.log("this hsould be nullttttt", user);
   };
 
