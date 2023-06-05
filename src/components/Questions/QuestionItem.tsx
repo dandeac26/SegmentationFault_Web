@@ -13,6 +13,8 @@ import {
   ModalContent,
   ModalCloseButton,
   ModalBody,
+  Tag,
+  TagLabel,
 } from "@chakra-ui/react";
 import moment from "moment";
 import axios from "axios";
@@ -95,47 +97,8 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
       }
     }
   };
-  //const { onDeleteQuestion, fetchQuestions } = useQuestions();
   
-  // const handleDelete = async (
-  //   event: React.MouseEvent<HTMLDivElement, MouseEvent>
-  // ) => {
-  //   event.stopPropagation();
-  //   setLoadingDelete(true);
-  //   try {
-
-  //     // use axios to delete question with endpoint : /deleteId={id}
-
-
-  //     const success = await onDeleteQuestion(question);
-  //     if (!success) throw new Error("Failed to delete question");
-
-  //     console.log("Question successfully deleted");
-
-  //     // Could proably move this logic to onDeleteQuestion function
-  //     if (router) router.back();
-  //   } catch (error: any) {
-  //     console.log("Error deleting question", error.message);
-  //     setLoadingDelete(false);
-  //   }
-  // };
-
-//   const handleUpdate = async (updatedQuestion: QuestionObj) => {
-//     try {
-//         // use axios to update question with endpoint : /questions/updateId={id}
-//         const response = await axios.put(`http://localhost:8080/questions//questions/updateId=${updatedQuestion.id}`, updatedQuestion);
-  
-//         if (response.status !== 200) {
-//             throw new Error("Failed to update question");
-//         }
-  
-//         // If you have a state variable for questions, you can update it here with the updated question
-  
-//         console.log("Question successfully updated");
-//     } catch (error: any) {
-//         console.log("Error updating question", error.message);
-//     }
-// };
+ 
   async function onUpdateQuestion(updatedQuestion: { id?: any; }) {
     try {
       const response = await fetch(`http://localhost:8080/questions/updateId=${updatedQuestion.id}`, {
@@ -361,7 +324,14 @@ useEffect(() => {
               />
             </Flex>
           )}
-        </Stack>
+        </Stack> 
+        { questionData.tags && questionData.tags.length > 0 && <Flex ml={1} mb={0.5} color="gray.500" fontWeight={600}>
+          {(questionData.tags).map((tag: any, index: React.Key | null | undefined) => (
+            <Tag key={index} size="sm" mr={1}>
+              <TagLabel>{tag}</TagLabel>
+            </Tag>
+          ))}
+        </Flex>}
         <Flex ml={1} mb={0.5} color="gray.500" fontWeight={600}>
           <Flex
             align="center"

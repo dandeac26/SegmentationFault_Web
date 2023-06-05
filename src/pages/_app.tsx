@@ -8,6 +8,7 @@ import jwt_decode from 'jwt-decode'; // Don't forget to install jwt-decode
 
 import { UserContext, User } from "@/pages/userContext";
 import { IoCodeSlashOutline } from "react-icons/io5";
+import { QuestionsProvider } from "./questionContext";
 
 export default function App({ Component, pageProps }: AppProps) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -44,9 +45,11 @@ export default function App({ Component, pageProps }: AppProps) {
     <UserContext.Provider value={{ currentUser, setCurrentUser }}>
       <RecoilRoot>
         <ChakraProvider theme={theme}>
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
+          <QuestionsProvider>
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          </QuestionsProvider>
         </ChakraProvider>
       </RecoilRoot>
     </UserContext.Provider>

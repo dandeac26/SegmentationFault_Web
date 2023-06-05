@@ -42,7 +42,7 @@ const Navbar: React.FC = () => {
           onClick={() => router.push(`/`)}
         />
       </Flex>
-      <SearchInput />
+      <SearchInput  />
       <RightContent user={currentUser} />
     </Flex>
 

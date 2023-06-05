@@ -86,6 +86,8 @@ const icons: React.FC<iconsProps> = ({ user }) => {
           borderRadius={4}
           color="brand.300"
           _hover={{ bg: "brand.500", color: "brand.400" }}
+          // push to '/' and give as paramater a boolean to the routing path to show currentUser's questions
+          onClick={() => router.push(`/?showUsersQuestions=true`)}
         >
           <Icon as={IoNotificationsOutline} fontSize={20} />
         </Flex>

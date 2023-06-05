@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Center,
   Flex,
@@ -11,17 +11,7 @@ import {
   Image,
   Text,
 } from "@chakra-ui/react";
-// import {
-//   collection,
-//   DocumentData,
-//   getDocs,
-//   limit,
-//   onSnapshot,
-//   orderBy,
-//   query,
-//   QuerySnapshot,
-//   where,
-// } from "firebase/firestore";
+import { useQuestionsSearch } from "@/pages/questionContext";
 import axios from "axios"
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
@@ -34,8 +24,16 @@ import QuestionLoader from "@/components/Questions/Loader";
 import QuestionItem from "@/components/Questions/QuestionItem";
 import { auth, firestore } from "../firebase/clientApp";
 import useQuestions from "@/hooks/useQuestions";
+import { UserContext, UserContextType } from "./userContext";
 
-const Home: NextPage = () => {
+type HomeProps = {
+  showUsersQuestions?: boolean;
+};
+
+
+const Home: NextPage = ( showUsersQuestions ) => {
+
+  const router = useRouter();
   const [user, loadingUser] = useAuthState(auth);
   const {
     questionStateValue,
@@ -48,31 +46,21 @@ const Home: NextPage = () => {
   } = useQuestions();
   
   const [users, setUsers] = useState<any[]>([]);
+  const userContext = useContext(UserContext) as UserContextType;
+  const { questions: searchQuestions } = useQuestionsSearch();
   
+  const [questions, setQuestions] = useState<Question[]>([]);  // maintain a local state for the list of questions
+
   useEffect(() => {
-    axios.get('http://localhost:8080/users/getAll')
-      .then(response => {
-        setUsers(response.data);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }, []);
+    setQuestions(searchQuestions);  // update the local state whenever the list of questions from useQuestionsSearch() changes
+  }, [searchQuestions]);
 
   const imagePath = "/images/applogo1.png"; 
 
   return (
     <>
       <Image src="https://i.imgur.com/vaHaOhq.png" borderRadius="lg" />
-      <>
-        {users.length > 0 ? (
-          console.log(users)
-        ) : (
-          <Text color="brand.100" width="50%" textAlign="center" align="center">
-            No users found
-          </Text>
-        )}
-        </>
+      
       
       <Center>
         
@@ -115,7 +103,7 @@ const Home: NextPage = () => {
                       <QuestionLoader />
                     ) : (
                       <Stack>
-                        {questionStateValue.questions.map(
+                        {questions.map( //questionStateValue.questions.map(
                           (question: Question, index) => (
                             <QuestionItem
                               key={question.id}
@@ -150,7 +138,5 @@ const Home: NextPage = () => {
 };
 
 export default Home;
-function setUser(data: any) {
-  throw new Error("Function not implemented.");
-}
+
 
