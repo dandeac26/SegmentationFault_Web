@@ -27,10 +27,11 @@ import {
   IoArrowUpCircleSharp,
   IoBookmarkOutline,
 } from "react-icons/io5";
-import { Question } from "@/atoms/questionsAtom";
+import { Question, QuestionObj } from "@/atoms/questionsAtom";
 import Link from "next/link";
 import { UserContext, UserContextType } from "@/pages/userContext";
-
+import useQuestions from "@/hooks/useQuestions";
+import { serverTimestamp } from "firebase/firestore";
 
 export type QuestionItemContentProps = {
 
@@ -52,7 +53,6 @@ export type QuestionItemContentProps = {
 };
 
 
-
 const QuestionItem: React.FC<QuestionItemContentProps> = ({
   question,
   questionIdx,
@@ -68,6 +68,7 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
   const singleQuestionView = !onSelectQuestion; // function not passed to [pid]
   const [imageUrl, setImageUrl] = useState("");
   const [questionData, setQuestionData] = useState<Question>({} as Question);
+  const [questionObj, setQuestionObj] = useState<QuestionObj>({} as QuestionObj);
   const { isOpen, onOpen, onClose } = useDisclosure(); // State and functions for controlling the modal
 
   const imageRef = useRef<HTMLImageElement>(null);
@@ -78,6 +79,7 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
   };
 
 
+  //const { fetchQuestions } = useQuestions();
   const resizeImage = () => {
     if (imageRef.current) {
       const modalContent = document.querySelector(".chakra-modal__content") as HTMLElement;
@@ -93,26 +95,120 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
       }
     }
   };
+  //const { onDeleteQuestion, fetchQuestions } = useQuestions();
   
+  // const handleDelete = async (
+  //   event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  // ) => {
+  //   event.stopPropagation();
+  //   setLoadingDelete(true);
+  //   try {
+
+  //     // use axios to delete question with endpoint : /deleteId={id}
+
+
+  //     const success = await onDeleteQuestion(question);
+  //     if (!success) throw new Error("Failed to delete question");
+
+  //     console.log("Question successfully deleted");
+
+  //     // Could proably move this logic to onDeleteQuestion function
+  //     if (router) router.back();
+  //   } catch (error: any) {
+  //     console.log("Error deleting question", error.message);
+  //     setLoadingDelete(false);
+  //   }
+  // };
+
+//   const handleUpdate = async (updatedQuestion: QuestionObj) => {
+//     try {
+//         // use axios to update question with endpoint : /questions/updateId={id}
+//         const response = await axios.put(`http://localhost:8080/questions//questions/updateId=${updatedQuestion.id}`, updatedQuestion);
   
+//         if (response.status !== 200) {
+//             throw new Error("Failed to update question");
+//         }
+  
+//         // If you have a state variable for questions, you can update it here with the updated question
+  
+//         console.log("Question successfully updated");
+//     } catch (error: any) {
+//         console.log("Error updating question", error.message);
+//     }
+// };
+  async function onUpdateQuestion(updatedQuestion: { id?: any; }) {
+    try {
+      const response = await fetch(`http://localhost:8080/questions/updateId=${updatedQuestion.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedQuestion),
+      });
+      
+      if (!response.ok) throw new Error('Response is not OK');
+      return response.json();
+    } catch (error) {
+      console.error('Failed to update question:', error);
+    }
+  }
+
+  const onEditButtonClick = () => {
+    if (router) router.push(`/submit?id=${questionData.id}`);
+  };
+
+  function handleUpdate() {
+    const updatedQuestion = {
+      id: questionData.id, // the id of the question you want to update
+      title: questionData.title,
+      body: 'This is the updated question body',
+      tags: ['tag1', 'tag2'],
+      picture: questionObj.picture,
+      votes: questionObj.votes,
+      creation_time: serverTimestamp(),
+      author_id: questionObj.author_id,
+      author: questionObj.author,
+    };
+
+    console.log('creationdateAt: ', updatedQuestion.creation_time);
+
+    onUpdateQuestion(updatedQuestion)
+      .then(response => {
+        console.log('Question updated successfully:', response);
+        // Route to '/submit'
+      })
+      .catch(error => console.error('Failed to update question:', error));
+  }
+
+
   const handleDelete = async (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
     event.stopPropagation();
     setLoadingDelete(true);
     try {
+  
+      // use axios to delete question with endpoint : /questions/deleteId={id}
+      const response = await axios.delete(`http://localhost:8080/questions/deleteId=${question.id}`);
+  
+      if (response.status !== 200) {
+        throw new Error("Failed to delete question");
+      }
+  
       const success = await onDeleteQuestion(question);
       if (!success) throw new Error("Failed to delete question");
-
+      
       console.log("Question successfully deleted");
-
-      // Could proably move this logic to onDeleteQuestion function
-      if (router) router.back();
+      //await fetchQuestions();
+      // Could probably move this logic to onDeleteQuestion function
+      if (router) router.push("/")
+      if (router) router.back()
     } catch (error: any) {
       console.log("Error deleting question", error.message);
-      setLoadingDelete(false);
+      setLoadingDelete(false);if (router) router.push("/")
     }
   };
+  
 
   useEffect(() => {
     const fetchImagePath = async () => {
@@ -123,6 +219,7 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
         );
         setImageUrl(response.data.picture);
         setQuestionData(response.data);
+        setQuestionObj(response.data);
         // if(userContext.currentUser != null){
         //   setUserIsCreator(String(question.author_id)=== String(userContext.currentUser.id));
           
@@ -151,41 +248,6 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
 
   const [userIsCreator, setUserIsCreator] = useState(false);
 
-//   const [dataReady, setDataReady] = useState(false);
-
-// useEffect(() => {
-//   if (userContext.currentUser && questionData.creatorId) {
-//     setDataReady(true);
-//   }
-// }, [userContext.currentUser, questionData.creatorId]);
-
-// useEffect(() => {
-//     if (!dataReady) {
-//       return; // Skip execution if currentUser or creatorId is not available
-//     }
-//     if(userContext.currentUser)
-//       setUserIsCreator(question.author_id === userContext.currentUser.id);
-//     console.log("userIsCreator (inside useEffect): ", userIsCreator);
-//   }, [question, userContext.currentUser, dataReady]);
-
-  // useEffect(() => {
-  //   //console.log("looking for why you don't work", userContext);
-    
-  //   if (!userContext.currentUser) {
-  //     return; // Skip execution if currentUser is not available
-  //   }
-    
-  //   //console.log("userContext.currentUser.id: ", userContext.currentUser.id);
-  //   //console.log("here is question.author_id", question.author_id);
-  
-  //   setUserIsCreator(String(question.author_id) === String(userContext.currentUser.id));
-  //   //console.log("userIsCreator (inside useEffect): ", userIsCreator);
-  // }, [question, userContext.currentUser]);
-  
-  
-  // useEffect(() => {
-  //   console.log("userIsCreator (outside useEffect): ", userIsCreator);
-  // }, [userIsCreator]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
 useEffect(() => {
@@ -321,16 +383,20 @@ useEffect(() => {
             <Icon as={IoArrowRedoOutline} mr={2} />
             <Text fontSize="9pt">Share</Text>
           </Flex>
+          {userIsCreator && (
           <Flex
             align="center"
             p="8px 10px"
             borderRadius={4}
             _hover={{ bg: "#b3d4cc" }}
             cursor="pointer"
+            // onClick={handleUpdate}
+            onClick={onEditButtonClick}
           >
             <Icon as={IoBookmarkOutline} mr={2} />
-            <Text fontSize="9pt">Save</Text>
+            <Text fontSize="9pt">Edit</Text>
           </Flex>
+          )}
           {userIsCreator && (
             <Flex
               align="center"

@@ -303,6 +303,7 @@ const useQuestions = () => {
     setLoading,
     onVote,
     error,
+    fetchQuestions, 
   };
 };
 

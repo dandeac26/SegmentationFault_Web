@@ -45,15 +45,28 @@ const formTabs = [
 
 type NewQuestionFormProps = {
   user: User;
+  question?: any;  // Add this
+  isEditMode?: boolean;  // Add this
 };
 
-const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user }) => {
+const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user, question, isEditMode }) => {
   const [selectedTab, setSelectedTab] = useState(formTabs[0].title);
   const [textInputs, setTextInputs] = useState({
     title: "",
     body: "",
     tags: "",
   });
+
+  useEffect(() => {
+  if (question) {
+    setTextInputs({
+      title: question.title,
+      body: question.body,
+      tags: question.tags.join(","),
+    });
+  }
+}, [question]); 
+  
   const [selectedFile, setSelectedFile] = useState<string>();
   const selectFileRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
@@ -96,52 +109,137 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user }) => {
 
     
     
-    const handleCreateQuestion = async () => {
+    // const handleCreateQuestion = async () => {
+    //   setLoading(true);
+
+    //   const { title, body, tags } = textInputs;
+    //   // var tagsArray = tagText.split(",").map((tag) => tag.trim());
+    //   const tagsArray = tags.split(",").map((tag) => tag.trim());
+
+
+    //   const questionData = {
+    //     title,
+    //     body,
+    //     tags : tagsArray,
+    //     votes: 0,
+    //     creation_time: serverTimestamp(),
+    //     picture: selectedFile, // Assign the Base64 string directly
+    //     author_id: "", // Placeholder for user ID
+    //     author: "", // Placeholder for author name
+    //   };
+
+    //   const response = await fetch(`http://localhost:8080/users/getByEmail?email=${encodeURIComponent(user.email!)}`);
+    //   const data = await response.json();
+    //   // make sure data is not null
+    //   if (data === null) {
+    //     console.log("data is null");
+    //     return;
+    //   }
+
+
+    //   console.log(data);
+    //   if (data && data.userId && data.email) {
+    //     questionData.author_id = data.userId; // Assign the user ID from the response
+    //     questionData.author = data.email.split("@")[0]; // Assign the author name
+    //   }
+
+    //   try {
+    //     const response = await fetch("http://localhost:8080/questions/create", {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify(questionData),
+    //     });
+    //     const data = await response.json();
+    //     console.log(data);
+    //     if (data.status === "ok") {
+    //       // Clear the cache to cause a refetch of the questions
+    //       setQuestionItems((prev) => ({
+    //         ...prev,
+    //         questionUpdateRequired: true,
+    //       }));
+    //       router.back();
+    //     }
+    //   } catch (error) {
+    //     console.log("createQuestion error", error);
+    //     setError("Error creating question");
+    //   }
+
+
+    //   setLoading(false);
+
+    //   // go to index.tsx
+    //   router.push("/");
+    // };
+
+    const handleCreateOrUpdateQuestion = async () => {
       setLoading(true);
-
+      console.log("handleCreateOrUpdateQuestion");
       const { title, body, tags } = textInputs;
-      // var tagsArray = tagText.split(",").map((tag) => tag.trim());
-      const tagsArray = tags.split(",").map((tag) => tag.trim());
-
-
-      const questionData = {
+      const tagsArray = tags.split(",").map((tag: string) => tag.trim());
+    
+      // const questionData = {
+      //   id,
+      //   title,
+      //   body,
+      //   tags: tagsArray,
+      //   votes: 0,
+      //   creation_time: serverTimestamp(),
+      //   picture: selectedFile,
+      //   author_id: "",
+      //   author: "",
+      // };
+      let questionData: { id?: string | number, title: string, body: string, tags: string[], votes: number, creation_time: string, picture: string | undefined, author_id: string, author: string } = {
         title,
         body,
-        tags : tagsArray,
+        tags: tagsArray,
         votes: 0,
-        creation_time: serverTimestamp(),
-        picture: selectedFile, // Assign the Base64 string directly
-        author_id: "", // Placeholder for user ID
-        author: "", // Placeholder for author name
-      };
-
+        creation_time: new Date().toISOString(),
+        picture: selectedFile,
+        author_id: "",
+        author: "",
+    };
+    
       const response = await fetch(`http://localhost:8080/users/getByEmail?email=${encodeURIComponent(user.email!)}`);
       const data = await response.json();
-      // make sure data is not null
       if (data === null) {
         console.log("data is null");
         return;
       }
-
-
-      console.log(data);
+    
       if (data && data.userId && data.email) {
-        questionData.author_id = data.userId; // Assign the user ID from the response
-        questionData.author = data.email.split("@")[0]; // Assign the author name
+        questionData.author_id = data.userId;
+        questionData.author = data.email.split("@")[0];
       }
-
+    
+      let result;
       try {
-        const response = await fetch("http://localhost:8080/questions/create", {
-          method: "POST",
+        if (isEditMode) {
+          questionData.id = question.id; // Set the question ID in the request body
+          if(questionData.picture === undefined)
+            questionData.picture = question.picture; // Set the picture to the existing picture
+          result = await fetch(`http://localhost:8080/questions/updateId=${questionData.id}`, { // Use '/' instead of '=' in the URL
+          method: "PUT",
           headers: {
-            "Content-Type": "application/json",
+              "Content-Type": "application/json",
           },
           body: JSON.stringify(questionData),
-        });
-        const data = await response.json();
+          });
+      }
+         else {
+          result = await fetch("http://localhost:8080/questions/create", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(questionData),
+          });
+        }
+        console.log("question trasnmitted, isEDit", questionData, isEditMode)
+        const data = await result.json();
         console.log(data);
         if (data.status === "ok") {
-          // Clear the cache to cause a refetch of the questions
           setQuestionItems((prev) => ({
             ...prev,
             questionUpdateRequired: true,
@@ -152,13 +250,11 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user }) => {
         console.log("createQuestion error", error);
         setError("Error creating question");
       }
-
-
+    
       setLoading(false);
-
-      // go to index.tsx
       router.push("/");
     };
+    
 
     
 
@@ -222,7 +318,7 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user }) => {
           <TextInputs
             textInputs={textInputs}
             onChange={onTextChange}
-            handleCreateQuestion={handleCreateQuestion}
+            handleCreateQuestion={handleCreateOrUpdateQuestion}
             loading={loading}
           />
         )}

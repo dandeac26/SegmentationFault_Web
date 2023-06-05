@@ -22,6 +22,18 @@ export type Question = {
   // editedAt?: Timestamp;
 };
 
+export type QuestionObj = {
+  id : string;
+  title: string;
+  body: string;
+  tags: any[];
+  votes: number;
+  creation_time: any;
+  picture: string;
+  author_id: string;
+  author: string;
+};
+
 export type QuestionVote = {
   id?: string;
   questionId: string;

@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import PageContentLayout from "@/components/layout/PageContent";
 import NewQuestionForm from "@/components/Questions/NewQuestionForm";
@@ -27,8 +27,13 @@ import { User, UserContext } from "@/pages/userContext";
 
 const CreateQuestion: NextPage = () => {
   //const [ loadingUser, error] = useAuthState(auth);
-  const router = useRouter();
+  
   const { currentUser } = useContext(UserContext) as { currentUser: User | null };
+  const router = useRouter();
+  const questionId = router.query.id;  // Get question id from the URL
+
+  // Check if the page is in edit mode
+  const isEditMode = Boolean(questionId);
   /**
    * Not sure why not working
    * Attempting to redirect user if not authenticated
@@ -42,6 +47,29 @@ const CreateQuestion: NextPage = () => {
 
  // console.log("HERE IS USER", user, loadingUser);
 
+ const [questionData, setQuestionData] = useState(null);
+
+
+ async function fetchQuestionData(id: string | string[] | undefined) {
+  const response = await fetch(`http://localhost:8080/questions/getById/${id}`);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  const questionData = await response.json();
+  return questionData;
+}
+
+useEffect(() => {
+  if (isEditMode) {
+    fetchQuestionData(questionId)
+      .then(data => {
+        setQuestionData(data);
+      })
+      .catch(error => console.error('There was an error!', error));
+  }
+}, [isEditMode, questionId]);
+
+
   return (
     <>
       <PageContentLayout maxWidth="1060px">
@@ -52,7 +80,7 @@ const CreateQuestion: NextPage = () => {
                 Create a question
               </Text>
             </Box>
-            {currentUser && <NewQuestionForm user={currentUser} />}
+            {currentUser && <NewQuestionForm user={currentUser} question={questionData} isEditMode={isEditMode} />}
           </>,
           <>
           </>
