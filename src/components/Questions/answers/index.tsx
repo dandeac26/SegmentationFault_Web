@@ -41,74 +41,82 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
   const [deleteLoading, setDeleteLoading] = useState("");
   const setAuthModalState = useSetRecoilState(authModalState);
   const setQuestionState = useSetRecoilState(questionState);
-  
+
+  const [updateAnswer, setUpdateAnswer] = useState<Answer | null>(null);
+
+  useEffect(() => {
+    if(updateAnswer) {
+      setAnswer(updateAnswer.text);
+    } else {
+      setAnswer('');
+    }
+  }, [updateAnswer]);
+
+
+
+  const pageTopRef = useRef<HTMLDivElement>(null);
+  const scrollToTop = () => {
+    if (pageTopRef.current) {
+      pageTopRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+
+
+
   const onCreateAnswer = async (answer: string, selectedFile: string | undefined) => {
-    console.log("onCreateAnswer", answer);
     if (!user) {
       setAuthModalState({ open: true, view: "login" });
       return;
     }
-
-   
+  
     setAnswerCreateLoading(true);
-    let result
+    let result;
     setAnswer("");
-    
-    let answerData: { id?: string | number, text: string, creationTime: string, votes: number, picture: string | undefined, questionId: string, author: string, authorName : string} = {
+  
+    let answerData: { id?: string | number, text: string, creationTime: string, votes: number, picture: string | undefined, questionId: string, author: string, authorName: string } = {
       text: answer,
       creationTime: new Date().toISOString(),
       votes: 0,
       picture: selectedFile,
       questionId: selectedQuestion.id,
       author: user.id,
-      authorName: user.email!.split("@")[0], 
+      authorName: user.email!.split("@")[0],
     };
-    console.log("answerNAME", answerData.authorName)
+  
     try {
-      // const batch = writeBatch(firestore);
-      console.log("answer stuff",answerData);
-      console.log("selfile ass", selectedFile)
-      // // Create answer document
-      // const answerDocRef = doc(collection(firestore, "answers"));
-      // batch.set(answerDocRef, {
-      //   questionId: selectedQuestion.id,
-      //   creatorId: user.uid,
-      //   creatorDisplayText: user.email!.split("@")[0],
-      //   creatorPhotoURL: user.photoURL,
-      //   text: answer,
-      //   questionTitle: selectedQuestion.title,
-      //   createdAt: serverTimestamp(),
-      // } as unknown as Answer);
-
-      // // Update question numberOfAnswers
-      // batch.update(doc(firestore, "questions", selectedQuestion.id), {
-      //   numberOfAnswers: increment(1),
-      // });
-      // await batch.commit();
-      /**
-       * this.id = id;
-        this.text = text;
-        this.creationTime = creationTime;
-        this.picture = picture;
-        this.votes = votes;
-        this.question_id = question_id;
-       */
-      
-      result = await fetch("http://localhost:8080/answers/create", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(answerData),
-          });
-
-      const data = await result.json();
-      if (data.status === "ok") {
-        console.log("answer created successfully", data);
+      // If updateAnswer is defined, we're updating an existing answer
+      if (updateAnswer) {
+        answerData.id = updateAnswer.id;
+  
+        // Update the answer
+        result = await fetch(`http://localhost:8080/answers/updateId=${updateAnswer.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(answerData),
+        });
       } else {
-        console.log("error creating answer", data);
+        // If updateAnswer is not defined, we're creating a new answer
+        result = await fetch("http://localhost:8080/answers/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(answerData),
+        });
       }
-
+  
+      const data = await result.json();
+      if (data.author) {
+        console.log(updateAnswer ? "answer updated successfully" : "answer created successfully", data);
+      } else {
+        console.log(updateAnswer ? "error updating answer" : "error creating answer", data);
+      }
+  
+      // Reset updateAnswer to null
+      setUpdateAnswer(null);
       
       const { id: questionId, title } = selectedQuestion;
       setAnswers((prev) => [
@@ -197,7 +205,21 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
     setAnswerFetchLoading(false);
 };
 
+const onUpdateAnswer = useCallback(
+  async (answer: Answer) => {
+    // If another answer is being edited, reset the updateAnswer state
+    if (updateAnswer && updateAnswer.id !== answer.id) {
+      setUpdateAnswer(null);
+    }
 
+    // Call onDeleteAnswer to delete the answer
+    //await onDeleteAnswer(answer);
+
+    // Set the updateAnswer state variable to fill the inputs
+    setUpdateAnswer(answer);
+  },
+  [onDeleteAnswer, setAnswers, setQuestionState, updateAnswer] // Add updateAnswer to the dependencies array
+);
 
 useEffect(() => {
   //console.log("HERE IS SELECTED QUESTION", selectedQuestion.id);
@@ -212,6 +234,7 @@ useEffect(() => {
       borderColor="brand.400"
       p={2}
       borderRadius="0px 0px 4px 4px"
+      ref={pageTopRef}  
     >
       <Flex
         direction="column"
@@ -248,9 +271,11 @@ useEffect(() => {
                     key={item.id}
                     answer={item}
                     onDeleteAnswer={onDeleteAnswer}
+                    onUpdateAnswer={onUpdateAnswer}
                     isLoading={deleteLoading === (item.id as string)}
                     userId={user?.id}
                     userEmail={user?.email}
+                    onEditClick={scrollToTop}
                   />
                 ))}
               </>

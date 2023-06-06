@@ -41,6 +41,8 @@ type AnswerItemProps = {
   userId?: string;
   selectedFile?: string;
   userEmail?: string;
+  onEditClick: () => void;
+
 };
 
 const AnswerItem: React.FC<AnswerItemProps> = ({
@@ -51,11 +53,13 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
   userId,
   selectedFile,
   userEmail,
+  onEditClick,
 }) => {
   const [imageUrl, setImageUrl] = useState("");
   const [loadingImage, setLoadingImage] = useState(true);
   const imageRef = useRef<HTMLImageElement>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const pageTopRef = useRef<HTMLDivElement>(null);
 
   const handleImageLoad = () => {
     setLoadingImage(false);
@@ -70,7 +74,9 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
     }
   }, [answer]);
   const handleEditAnswer = () => {
-    onUpdateAnswer(answer);
+    window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll to the top of the page
+    //onEditClick(); // Call the onEditClick function
+    onUpdateAnswer(answer); // Call the onUpdateAnswer function with the answer parameter
   };
   return (
     <Flex>
