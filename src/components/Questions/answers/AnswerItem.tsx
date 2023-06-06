@@ -39,6 +39,7 @@ type AnswerItemProps = {
   isLoading: boolean;
   userId?: string;
   selectedFile?: string;
+  userEmail?: string;
 };
 
 const AnswerItem: React.FC<AnswerItemProps> = ({
@@ -46,7 +47,8 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
   onDeleteAnswer,
   isLoading,
   userId,
-  selectedFile
+  selectedFile,
+  userEmail,
 }) => {
   const [imageUrl, setImageUrl] = useState("");
   const [loadingImage, setLoadingImage] = useState(true);
@@ -55,16 +57,19 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
   const handleImageLoad = () => {
     setLoadingImage(false);
   };
+  console.log("look userEmail4", userEmail)
   const imagePath = "/images/applogo1.png"; 
   useEffect(() => {
+    //console.log("look userEmail3", userEmail?.split("@")[0])
     //console.log("useeffectanswer", answer.picture)
-    console.log("answer is console" , answer.authorName);
+    //console.log("answer is console" , answer.authorName);
     if(answer.picture) {
       setImageUrl(answer.picture);
     }
+    //console.log("llok", String(userEmail?.split("@")[0])===String(answer.authorName), userEmail?.split("@")[0],  answer.authorName)
     //answer.creatorDisplayText = answer.authorName
   }, [answer]);
-  
+  //console.log("llok", String(userEmail?.split("@")[0])===String(answer.authorName), userEmail?.split("@")[0],  answer.authorName)
   return (
     <Flex>
       <Box mr={2}>
@@ -129,7 +134,7 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
         >
           <Icon as={IoArrowUpCircleOutline} />
           <Icon as={IoArrowDownCircleOutline} />
-          {userId === answer.creatorId && (
+          {String(userEmail?.split("@")[0])===String(answer.authorName) && (
             <>
               <Text fontSize="9pt" _hover={{ color: "brand.300" }}>
                 Edit

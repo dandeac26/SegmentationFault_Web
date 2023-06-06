@@ -35,7 +35,7 @@ const QuestionPage: React.FC<QuestionPageProps> = () => {
 
   useEffect(() => {
     const { qid = "" } = router.query;
-
+    console.log("nslookp", currentUser)
     if (qid && !questionStateValue.selectedQuestion) {
       fetchQuestion(qid as string);
     }

@@ -26,6 +26,7 @@ import { firestore } from "../../../firebase/clientApp";
 import AnswerItem, { Answer } from "./AnswerItem";
 import AnswerInput from "./input";
 import { User } from "@/pages/userContext";
+import axios from "axios";
 
 type AnswersProps = {
   user: User | null;
@@ -145,21 +146,21 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
     setAnswerCreateLoading(false);
   };
 
+  // 
   const onDeleteAnswer = useCallback(
     async (answer: Answer) => {
       setDeleteLoading(answer.id as string);
       try {
         if (!answer.id) throw "Answer has no ID";
-        // const batch = writeBatch(firestore);
-        // const answerDocRef = doc(firestore, "answers", answer.id);
-        // batch.delete(answerDocRef);
-
-        // batch.update(doc(firestore, "questions", answer.questionId), {
-        //   numberOfAnswers: increment(-1),
-        // });
-
-        // await batch.commit();
-
+  
+        // make a delete request to your server
+        const response = await axios.delete(`http://localhost:8080/answers/deleteId=${answer.id}`);
+        if (response.status !== 200) {
+          throw new Error("Failed to delete answer");
+        }
+  
+        console.log("Answer successfully deleted");
+        getQuestionAnswers();
         setQuestionState((prev) => ({
           ...prev,
           selectedQuestion: {
@@ -168,17 +169,19 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
           } as Question,
           questionUpdateRequired: true,
         }));
-
+  
         setAnswers((prev) => prev.filter((item) => item.id !== answer.id));
         // return true;
       } catch (error: any) {
-        console.log("Error deletig answer", error.message);
+        console.log("Error deleting answer", error.message);
         // return false;
+        getQuestionAnswers();
       }
       setDeleteLoading("");
     },
     [setAnswers, setQuestionState]
   );
+  
 
   const getQuestionAnswers = async () => {
     setAnswerFetchLoading(true);
@@ -197,8 +200,9 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
 
 
 useEffect(() => {
-  console.log("HERE IS SELECTED QUESTION", selectedQuestion.id);
+  //console.log("HERE IS SELECTED QUESTION", selectedQuestion.id);
   getQuestionAnswers();
+  //console.log("looknsup2", user?.email)
 }, [selectedQuestion]);
 
   return (
@@ -246,6 +250,7 @@ useEffect(() => {
                     onDeleteAnswer={onDeleteAnswer}
                     isLoading={deleteLoading === (item.id as string)}
                     userId={user?.id}
+                    userEmail={user?.email}
                   />
                 ))}
               </>

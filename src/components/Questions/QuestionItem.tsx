@@ -19,7 +19,7 @@ import {
 import moment from "moment";
 import axios from "axios";
 import { NextRouter } from "next/router";
-import { AiOutlineDelete } from "react-icons/ai";
+import { AiFillSketchSquare, AiOutlineDelete } from "react-icons/ai";
 import { BsChat, BsDot } from "react-icons/bs";
 import {
   IoArrowDownCircleOutline,
@@ -52,6 +52,7 @@ export type QuestionItemContentProps = {
   questionIdx?: number;
   userVoteValue?: number;
   homePage?: boolean;
+  fetchTheQuestions?: () => void;
 };
 
 
@@ -64,6 +65,7 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
   onDeleteQuestion,
   userVoteValue,
   homePage,
+  fetchTheQuestions
 }) => {
   const [loadingImage, setLoadingImage] = useState(true);
   const [loadingDelete, setLoadingDelete] = useState(false);
@@ -75,6 +77,7 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
   
   const imageRef = useRef<HTMLImageElement>(null);
   const userContext = useContext(UserContext) as UserContextType;
+  const { fetchQuestions } = useQuestions();
 
   const handleImageLoad = () => {
     setLoadingImage(false);
@@ -174,8 +177,14 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
       setLoadingDelete(false);
       //window.location.reload();
       if (router) router.push("/")
-       else 
-        window.location.reload();
+       else {
+        //window.location.reload();
+          //fetchTheQuestions();
+          //fetchTheQuestions();
+          fetchQuestions();
+       }
+        
+        //setLoadingDelete(false);
     }
   };
   
