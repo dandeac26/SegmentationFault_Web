@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -10,7 +10,7 @@ import {
   Image,
 } from "@chakra-ui/react";
 
-import { User } from "@/pages/userContext";
+import { User, UserContext } from "@/pages/userContext";
 
 import {
   addDoc,
@@ -73,7 +73,7 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user, question, isEdi
   const [error, setError] = useState("");
   const router = useRouter();
   const setQuestionItems = useSetRecoilState(questionState);
-
+  const { currentUser } = useContext(UserContext) as { currentUser: User | null };
  
 
   /**
@@ -119,28 +119,40 @@ const NewQuestionForm: React.FC<NewQuestionFormProps> = ({ user, question, isEdi
       //   author_id: "",
       //   author: "",
       // };
-      let questionData: { id?: string | number, title: string, body: string, tags: string[], votes: number, creation_time: string, picture: string | undefined, author_id: string, author: string } = {
+      let questionData: { id?: string | number, title: string, body: string, tags: string[], voteStatus: number, creation_time: string, picture: string | undefined, author_id: string, author: string } = {
         title,
         body,
         tags: tagsArray,
-        votes: 0,
+        voteStatus: 0,
         creation_time: new Date().toISOString(),
         picture: selectedFile,
         author_id: "",
         author: "",
     };
     
-      const response = await fetch(`http://localhost:8080/users/getByEmail?email=${encodeURIComponent(user.email!)}`);
-      const data = await response.json();
-      if (data === null) {
-        console.log("data is null");
-        return;
-      }
+      // const response = await fetch(`http://localhost:8080/users/getByEmail?email=${encodeURIComponent(user.email!)}`);
+      // console.log("response", response)
+      // if (!response.ok) {
+      //   throw new Error(`HTTP error! status: ${response.status}`);
+      // }
+      // let data;
+      // if (response.status !== 204) {
+      //   data = await response.json();
+      // } else {
+      //   console.log("No content returned from server");
+      // }
+      // //const data = await response.json();
+      // if (data === null) {
+      //   console.log("data is null");
+      //   return;
+      // }
     
-      if (data && data.userId && data.email) {
-        questionData.author_id = data.userId;
-        questionData.author = data.email.split("@")[0];
+      //if (data && data.userId && data.email) {}
+      if(currentUser?.id && currentUser.email){
+        questionData.author_id = currentUser.id;
+        questionData.author = currentUser.email.split("@")[0];
       }
+      
     
       let result;
       try {
