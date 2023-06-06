@@ -9,7 +9,7 @@ const Navbar: React.FC = () => {
   const router = useRouter();
   const user = null; // Update with the appropriate user value from your UserContext
   const { currentUser } = useContext(UserContext) as { currentUser: User | null };
-  console.log("this should be the user", currentUser)
+  //console.log("this should be the user", currentUser)
   return (
     
       

@@ -22,7 +22,7 @@ export default function App({ Component, pageProps }: AppProps) {
     if (jwt) {
       // Decode the JWT
       const decodedToken: any = jwt_decode(jwt);
-      console.log("this is decodedToken", decodedToken)
+      //console.log("this is decodedToken", decodedToken)
       // Check if the JWT is expired
       const currentTime = Date.now().valueOf() / 1000;
       // if (decodedToken.exp > currentTime) {

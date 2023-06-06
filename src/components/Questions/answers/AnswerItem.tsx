@@ -36,6 +36,7 @@ export type Answer = {
 type AnswerItemProps = {
   answer: Answer;
   onDeleteAnswer: (answer: Answer) => void;
+  onUpdateAnswer: (answer: Answer) => void;
   isLoading: boolean;
   userId?: string;
   selectedFile?: string;
@@ -45,6 +46,7 @@ type AnswerItemProps = {
 const AnswerItem: React.FC<AnswerItemProps> = ({
   answer,
   onDeleteAnswer,
+  onUpdateAnswer,
   isLoading,
   userId,
   selectedFile,
@@ -54,22 +56,22 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
   const [loadingImage, setLoadingImage] = useState(true);
   const imageRef = useRef<HTMLImageElement>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
+
   const handleImageLoad = () => {
     setLoadingImage(false);
   };
-  console.log("look userEmail4", userEmail)
-  const imagePath = "/images/applogo1.png"; 
+
+  //console.log("look userEmail4", userEmail)
+ 
+
   useEffect(() => {
-    //console.log("look userEmail3", userEmail?.split("@")[0])
-    //console.log("useeffectanswer", answer.picture)
-    //console.log("answer is console" , answer.authorName);
     if(answer.picture) {
       setImageUrl(answer.picture);
     }
-    //console.log("llok", String(userEmail?.split("@")[0])===String(answer.authorName), userEmail?.split("@")[0],  answer.authorName)
-    //answer.creatorDisplayText = answer.authorName
   }, [answer]);
-  //console.log("llok", String(userEmail?.split("@")[0])===String(answer.authorName), userEmail?.split("@")[0],  answer.authorName)
+  const handleEditAnswer = () => {
+    onUpdateAnswer(answer);
+  };
   return (
     <Flex>
       <Box mr={2}>
@@ -136,7 +138,9 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
           <Icon as={IoArrowDownCircleOutline} />
           {String(userEmail?.split("@")[0])===String(answer.authorName) && (
             <>
-              <Text fontSize="9pt" _hover={{ color: "brand.300" }}>
+              <Text fontSize="9pt" _hover={{ color: "brand.300" }}
+                onClick={handleEditAnswer}
+              >
                 Edit
               </Text>
               <Text

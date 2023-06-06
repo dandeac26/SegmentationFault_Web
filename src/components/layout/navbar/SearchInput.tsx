@@ -11,7 +11,7 @@ const SearchInput: React.FC = () => {
 
   const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    console.log("arrived here ", e.target.value)
+    //console.log("arrived here ", e.target.value)
     if(e.target.value !== '') {
       const response = await axios.get('http://localhost:8080/questions/search', {
         params: {
@@ -24,7 +24,7 @@ const SearchInput: React.FC = () => {
       if (response.status === 200) {
         setQuestions(response.data);
         setSearchString(e.target.value)
-        console.log("arrived here 3", response.data)
+        //console.log("arrived here 3", response.data)
       } else {
         throw new Error('Failed to fetch search results');
       }
@@ -35,7 +35,7 @@ const SearchInput: React.FC = () => {
         setQuestions(response.data);
         setSearchString("");
         router.push('/')
-        console.log("arrived here 4", response.data)
+        //console.log("arrived here 4", response.data)
       } else {
         throw new Error('Failed to fetch questions');
       }
