@@ -43,6 +43,7 @@ const Home: NextPage = ( showUsersQuestions ) => {
     onDeleteQuestion,
     loading,
     setLoading,
+    fetchQuestions
   } = useQuestions();
   
   const [users, setUsers] = useState<any[]>([]);
@@ -112,6 +113,7 @@ const Home: NextPage = ( showUsersQuestions ) => {
                         {questions.map( //questionStateValue.questions.map(
                           (question: Question, index) => (
                             <QuestionItem
+                              fetchTheQuestions={fetchQuestions}
                               key={question.id}
                               question={question}
                               questionIdx={index}
