@@ -72,7 +72,7 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
   const [questionData, setQuestionData] = useState<Question>({} as Question);
   const [questionObj, setQuestionObj] = useState<QuestionObj>({} as QuestionObj);
   const { isOpen, onOpen, onClose } = useDisclosure(); // State and functions for controlling the modal
-
+  
   const imageRef = useRef<HTMLImageElement>(null);
   const userContext = useContext(UserContext) as UserContextType;
 
@@ -150,25 +150,32 @@ const QuestionItem: React.FC<QuestionItemContentProps> = ({
     event.stopPropagation();
     setLoadingDelete(true);
     try {
-  
+      
       // use axios to delete question with endpoint : /questions/deleteId={id}
       const response = await axios.delete(`http://localhost:8080/questions/deleteId=${question.id}`);
-  
+      
       if (response.status !== 200) {
         throw new Error("Failed to delete question");
       }
-  
+      
       const success = await onDeleteQuestion(question);
       if (!success) throw new Error("Failed to delete question");
       
       console.log("Question successfully deleted");
+
       //await fetchQuestions();
+      window.location.reload();
       // Could probably move this logic to onDeleteQuestion function
+      console.log("router: ", router);
       if (router) router.push("/")
       if (router) router.back()
     } catch (error: any) {
       console.log("Error deleting question", error.message);
-      setLoadingDelete(false);if (router) router.push("/")
+      setLoadingDelete(false);
+      //window.location.reload();
+      if (router) router.push("/")
+       else 
+        window.location.reload();
     }
   };
   
