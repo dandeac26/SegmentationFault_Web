@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Box,
   Flex,
@@ -40,17 +40,32 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
   const [deleteLoading, setDeleteLoading] = useState("");
   const setAuthModalState = useSetRecoilState(authModalState);
   const setQuestionState = useSetRecoilState(questionState);
-
-  const onCreateAnswer = async (answer: string) => {
+  
+  const onCreateAnswer = async (answer: string, selectedFile: string | undefined) => {
+    console.log("onCreateAnswer", answer);
     if (!user) {
       setAuthModalState({ open: true, view: "login" });
       return;
     }
 
+   
     setAnswerCreateLoading(true);
+    let result
+    setAnswer("");
+    
+    let answerData: { id?: string | number, text: string, creationTime: string, votes: number, picture: string | undefined, questionId: string, author: string } = {
+      text: answer,
+      creationTime: new Date().toISOString(),
+      votes: 0,
+      picture: selectedFile,
+      questionId: selectedQuestion.id,
+      author: user.id,
+    };
+
     try {
       // const batch = writeBatch(firestore);
-
+      console.log("answer stuff",answerData);
+      console.log("selfile ass", selectedFile)
       // // Create answer document
       // const answerDocRef = doc(collection(firestore, "answers"));
       // batch.set(answerDocRef, {
@@ -68,8 +83,31 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
       //   numberOfAnswers: increment(1),
       // });
       // await batch.commit();
+      /**
+       * this.id = id;
+        this.text = text;
+        this.creationTime = creationTime;
+        this.picture = picture;
+        this.votes = votes;
+        this.question_id = question_id;
+       */
+      
+      result = await fetch("http://localhost:8080/answers/create", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(answerData),
+          });
 
-      setAnswer("");
+      const data = await result.json();
+      if (data.status === "ok") {
+        console.log("answer created successfully", data);
+      } else {
+        console.log("error creating answer", data);
+      }
+
+      
       const { id: questionId, title } = selectedQuestion;
       setAnswers((prev) => [
         {

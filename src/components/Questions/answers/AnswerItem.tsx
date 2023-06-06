@@ -1,12 +1,15 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Avatar,
   Box,
   Flex,
   Icon,
+  Skeleton,
   Spinner,
   Stack,
+  Image,
   Text,
+  useDisclosure,
 } from "@chakra-ui/react";
 //import { Timestamp } from "firebase/co";
 import moment from "moment";
@@ -15,16 +18,18 @@ import {
   IoArrowDownCircleOutline,
   IoArrowUpCircleOutline,
 } from "react-icons/io5";
+import { Timestamp } from "firebase/firestore";
 
 export type Answer = {
   id?: string;
   creatorId: string;
   creatorDisplayText: string;
-  creatorPhotoURL: string;
+  picture: string;
   questionId: string;
   questionTitle: string;
   text: string;
-  // createdAt?: Timestamp;
+  createdAt?: Timestamp;
+  votes: number;
 };
 
 type AnswerItemProps = {
@@ -40,6 +45,21 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
   isLoading,
   userId,
 }) => {
+  const [imageUrl, setImageUrl] = useState("");
+  const [loadingImage, setLoadingImage] = useState(true);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const handleImageLoad = () => {
+    setLoadingImage(false);
+  };
+
+  useEffect(() => {
+    console.log("useeffectanswer", answer.picture)
+    if(answer.picture) {
+      setImageUrl(answer.picture);
+    }
+  }, [answer]);
+  
   return (
     <Flex>
       <Box mr={2}>
@@ -60,10 +80,41 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
             </Text>
           )} */}
           {isLoading && <Spinner size="sm" />}
+
         </Stack>
+        <Stack>
         <Text fontSize="10pt" color="white">
           {answer.text}
         </Text>
+        <Text> image here </Text>
+        {imageUrl && (
+            <Flex justify="center" align="center" p={2} >
+              {loadingImage && (
+                <Skeleton height="200px" width="100%" borderRadius={4} />
+              )}
+              <Image
+                src={imageUrl}
+                alt="Question Image"
+                borderRadius="lg"
+                onLoad={handleImageLoad}
+                ref={imageRef}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onOpen();
+                }}
+                //onClick={onOpen}
+                style={{
+                  cursor: "zoom-in",
+                  objectFit: "cover",
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  width: "auto",
+                  height: "auto",
+                }}
+              />
+            </Flex>
+          )}
+        </Stack>
         <Stack
           direction="row"
           align="center"

@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, useState } from "react";
+import React, { MouseEventHandler, useEffect, useRef, useState } from "react";
 import { Flex, Textarea, Button, Text } from "@chakra-ui/react";
 import { User } from "@/pages/userContext";
 import AuthButtons from "@/components/layout/navbar/rightContent/AuthButtons";
@@ -8,7 +8,7 @@ type AnswerInputProps = {
   setAnswer: (value: string) => void;
   loading: boolean;
   user: User | null;
-  onCreateAnswer: (answer: string) => void;
+  onCreateAnswer: (answer: string, selectedFile: string | undefined) => void;
 };
 
 
@@ -21,6 +21,23 @@ const AnswerInput: React.FC<AnswerInputProps> = ({
   user,
   onCreateAnswer,
 }) => {
+
+
+  const [selectedFile, setSelectedFile] = useState<string>();
+  const selectFileRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files![0];
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = function() {
+      const base64data = reader.result as string;
+      setSelectedFile(base64data);
+    }
+    console.log("selfile", selectedFile)
+  };
+
+
   return (
     <Flex direction="column" position="relative">
       {user ? (
@@ -63,11 +80,22 @@ const AnswerInput: React.FC<AnswerInputProps> = ({
             p="6px 8px"
             borderRadius="0px 0px 4px 4px"
           >
+            <input
+              type="file"
+              ref={selectFileRef}
+              onChange={handleFileChange}
+              style={{ display: "none" }}
+            />
+            <Button onClick={() => selectFileRef.current!.click()}
+              height="26px"
+              mr="8px"
+            >Upload Picture</Button>
+
             <Button
               height="26px"
               disabled={!answer.length}
               isLoading={loading}
-              onClick={() => onCreateAnswer(answer)}
+              onClick={() => onCreateAnswer(answer, selectedFile)}
             >
               Answer
             </Button>
