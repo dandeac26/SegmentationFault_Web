@@ -47,7 +47,7 @@ const Home: NextPage = ( showUsersQuestions ) => {
   
   const [users, setUsers] = useState<any[]>([]);
   const userContext = useContext(UserContext) as UserContextType;
-  const { questions: searchQuestions } = useQuestionsSearch();
+  const { questions: searchQuestions, searchString } = useQuestionsSearch();
   
   const [questions, setQuestions] = useState<Question[]>([]);  // maintain a local state for the list of questions
 
@@ -56,7 +56,13 @@ const Home: NextPage = ( showUsersQuestions ) => {
   }, [searchQuestions]);
 
   const imagePath = "/images/applogo1.png"; 
-
+  useEffect(() => {
+    if (searchString !== "") {
+      setQuestions(searchQuestions);
+    } else {
+      setQuestions(questionStateValue.questions);
+    }
+  }, [searchQuestions, questionStateValue.questions, searchString]);
   return (
     <>
       <Image src="https://i.imgur.com/vaHaOhq.png" borderRadius="lg" />
