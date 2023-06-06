@@ -118,6 +118,7 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
           questionId,
           questionTitle: title,
           text: answer,
+          picture: selectedFile,
           createdAt: {
             seconds: Date.now() / 1000,
           },

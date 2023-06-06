@@ -37,6 +37,7 @@ type AnswerItemProps = {
   onDeleteAnswer: (answer: Answer) => void;
   isLoading: boolean;
   userId?: string;
+  selectedFile?: string;
 };
 
 const AnswerItem: React.FC<AnswerItemProps> = ({
@@ -44,6 +45,7 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
   onDeleteAnswer,
   isLoading,
   userId,
+  selectedFile
 }) => {
   const [imageUrl, setImageUrl] = useState("");
   const [loadingImage, setLoadingImage] = useState(true);
@@ -52,7 +54,7 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
   const handleImageLoad = () => {
     setLoadingImage(false);
   };
-
+  const imagePath = "/images/applogo1.png"; 
   useEffect(() => {
     console.log("useeffectanswer", answer.picture)
     if(answer.picture) {
@@ -86,7 +88,7 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
         <Text fontSize="10pt" color="white">
           {answer.text}
         </Text>
-        <Text> image here </Text>
+        
         {imageUrl && (
             <Flex justify="center" align="center" p={2} >
               {loadingImage && (
