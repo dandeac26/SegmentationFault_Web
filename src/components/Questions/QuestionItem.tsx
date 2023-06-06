@@ -254,6 +254,35 @@ useEffect(() => {
   }, [userIsCreator]);
 
 
+  async function handleVote(voteType: string) {
+    try {
+      // Check if the user is not the creator of the question.
+      if (userIsCreator) {
+        console.error("User cannot vote their own question");
+        return;
+      }
+  
+      const response = await axios.post('http://localhost:8080/questions/vote', {
+        questionId: question.id,
+        userId: userContext?.currentUser?.id, // assuming this is the user's id
+        voteType,
+      });
+  
+      if (!response) throw new Error('Response is not OK');
+      
+      const updatedVoteCount = response.data.voteCount;
+      setQuestionData((prevData) => ({
+        ...prevData,
+        voteStatus: updatedVoteCount,
+      }));
+  
+    } catch (error) {
+      console.error('Failed to cast vote:', error);
+    }
+  }
+
+
+
   return (
     <Flex
       border="1px solid"
@@ -282,7 +311,7 @@ useEffect(() => {
           color={userVoteValue === 1 ? "#2bcc8c" : "gray.500"}
           fontSize={22}
           cursor="pointer"
-          onClick={(event) => onVote(event, question, 1)}
+          onClick={(event) => handleVote('upvote')}
         />
         <Text fontSize="9pt" fontWeight={600}>
           {question.voteStatus}
@@ -296,7 +325,7 @@ useEffect(() => {
           color={userVoteValue === -1 ? "brand.600" : "gray.500"}
           fontSize={22}
           cursor="pointer"
-          onClick={(event) => onVote(event, question, -1)}
+          onClick={() => handleVote('downvote')}
         />
       </Flex>
       <Flex direction="column" width="100%" bg="brand.400" maxHeight="500" overflow="auto">
