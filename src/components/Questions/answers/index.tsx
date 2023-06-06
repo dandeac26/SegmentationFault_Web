@@ -53,15 +53,16 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
     let result
     setAnswer("");
     
-    let answerData: { id?: string | number, text: string, creationTime: string, votes: number, picture: string | undefined, questionId: string, author: string } = {
+    let answerData: { id?: string | number, text: string, creationTime: string, votes: number, picture: string | undefined, questionId: string, author: string, authorName : string} = {
       text: answer,
       creationTime: new Date().toISOString(),
       votes: 0,
       picture: selectedFile,
       questionId: selectedQuestion.id,
       author: user.id,
+      authorName: user.email!.split("@")[0], 
     };
-
+    console.log("answerNAME", answerData.authorName)
     try {
       // const batch = writeBatch(firestore);
       console.log("answer stuff",answerData);
@@ -113,14 +114,16 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
         {
           // id: answerDocRef.id,
           creatorId: user.id,
-          creatorDisplayText: user.email!.split("@")[0],
+          creatorDisplayText: answerData.authorName,//user.email!.split("@")[0],
           //creatorPhotoURL: user.photoURL,
           questionId,
           questionTitle: title,
           text: answer,
           picture: selectedFile,
-          createdAt: {
+          
+          createdAt: { 
             seconds: Date.now() / 1000,
+            nanoseconds: 0, // adjust this if needed
           },
         } as unknown as Answer,
         ...prev,
@@ -138,6 +141,7 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
     } catch (error: any) {
       console.log("onCreateAnswer error", error.message);
     }
+    selectedFile = undefined;
     setAnswerCreateLoading(false);
   };
 
@@ -177,29 +181,25 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
   );
 
   const getQuestionAnswers = async () => {
+    setAnswerFetchLoading(true);
     try {
-      // const answersQuery = query(
-      //   collection(firestore, "answers"),
-      //   where("questionId", "==", selectedQuestion.id),
-      //   orderBy("createdAt", "desc")
-      // );
-      // const answerDocs = await getDocs(answersQuery);
-      // const answers = answerDocs.docs.map((doc) => ({
-      //   id: doc.id,
-      //   ...doc.data(),
-      // }));
-      setAnswers(answers as Answer[]);
+      const response = await fetch(`http://localhost:8080/answers/getByQuestion/${selectedQuestion.id}`);
+      const data = await response.json();
+
+      // Assuming your backend returns the answers in a property named 'data'
+      setAnswers(data as Answer[]);
     } catch (error: any) {
       console.log("getQuestionAnswers error", error.message);
     }
     setAnswerFetchLoading(false);
-  };
+};
 
-  useEffect(() => {
-    console.log("HERE IS SELECTED QUESTION", selectedQuestion.id);
 
-    getQuestionAnswers();
-  }, []);
+
+useEffect(() => {
+  console.log("HERE IS SELECTED QUESTION", selectedQuestion.id);
+  getQuestionAnswers();
+}, [selectedQuestion]);
 
   return (
     <Box

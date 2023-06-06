@@ -95,7 +95,11 @@ const AnswerInput: React.FC<AnswerInputProps> = ({
               height="26px"
               disabled={!answer.length}
               isLoading={loading}
-              onClick={() => onCreateAnswer(answer, selectedFile)}
+              onClick={() =>{
+                onCreateAnswer(answer, selectedFile);
+                setSelectedFile(undefined);
+              
+              }}
             >
               Answer
             </Button>

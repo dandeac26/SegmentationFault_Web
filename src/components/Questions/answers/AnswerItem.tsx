@@ -21,6 +21,7 @@ import {
 import { Timestamp } from "firebase/firestore";
 
 export type Answer = {
+  authorName: string;
   id?: string;
   creatorId: string;
   creatorDisplayText: string;
@@ -56,10 +57,12 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
   };
   const imagePath = "/images/applogo1.png"; 
   useEffect(() => {
-    console.log("useeffectanswer", answer.picture)
+    //console.log("useeffectanswer", answer.picture)
+    console.log("answer is console" , answer.authorName);
     if(answer.picture) {
       setImageUrl(answer.picture);
     }
+    //answer.creatorDisplayText = answer.authorName
   }, [answer]);
   
   return (
@@ -74,13 +77,13 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
             fontWeight={700}
             _hover={{ textDecoration: "underline", cursor: "pointer" }}
           >
-            {answer.creatorDisplayText}
+            {answer.authorName}
           </Text>
-          {/* {answer.createdAt?.seconds && (
+          {answer.createdAt?.seconds && (
             <Text color="brand.400">
               {moment(new Date(answer.createdAt?.seconds * 1000)).fromNow()}
             </Text>
-          )} */}
+          )}
           {isLoading && <Spinner size="sm" />}
 
         </Stack>
