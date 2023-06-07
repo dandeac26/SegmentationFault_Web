@@ -107,6 +107,7 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
           body: JSON.stringify(answerData),
         });
       }
+      console.log("interestanswer", answerData)
   
       const data = await result.json();
       if (data.author) {
@@ -158,9 +159,10 @@ const Answers: React.FC<AnswersProps> = ({ user, selectedQuestion }) => {
   const onDeleteAnswer = useCallback(
     async (answer: Answer) => {
       setDeleteLoading(answer.id as string);
+      console.log("interanswer", answer)
       try {
         if (!answer.id) throw "Answer has no ID";
-  
+        
         // make a delete request to your server
         const response = await axios.delete(`http://localhost:8080/answers/deleteId=${answer.id}`);
         if (response.status !== 200) {
@@ -276,6 +278,7 @@ useEffect(() => {
                     userId={user?.id}
                     userEmail={user?.email}
                     onEditClick={scrollToTop}
+                    userRole={user?.role}
                   />
                 ))}
               </>

@@ -4,6 +4,7 @@ import { createContext, useState } from 'react';
 export type User = {
   id: string;
   email: string;
+  role: string;
 };
 
 export type UserContextType = {

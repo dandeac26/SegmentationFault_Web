@@ -424,7 +424,7 @@ useEffect(() => {
             <Icon as={IoArrowRedoOutline} mr={2} />
             <Text fontSize="9pt">Share</Text>
           </Flex>
-          {userIsCreator && (
+          {(userIsCreator || userContext?.currentUser?.role == "ADMIN") && (
           <Flex
             align="center"
             p="8px 10px"

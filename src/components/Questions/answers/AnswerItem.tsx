@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   Avatar,
   Box,
@@ -19,6 +19,8 @@ import {
   IoArrowUpCircleOutline,
 } from "react-icons/io5";
 import { Timestamp } from "firebase/firestore";
+import { UserContext, UserContextType } from "@/pages/userContext";
+import axios from "axios";
 
 export type Answer = {
   authorName: string;
@@ -42,7 +44,7 @@ type AnswerItemProps = {
   selectedFile?: string;
   userEmail?: string;
   onEditClick: () => void;
-
+  userRole?: string;
 };
 
 const AnswerItem: React.FC<AnswerItemProps> = ({
@@ -54,21 +56,73 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
   selectedFile,
   userEmail,
   onEditClick,
+  userRole,
 }) => {
   const [imageUrl, setImageUrl] = useState("");
   const [loadingImage, setLoadingImage] = useState(true);
   const imageRef = useRef<HTMLImageElement>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const pageTopRef = useRef<HTMLDivElement>(null);
-
+  const [voteCount, setVoteCount] = useState(0);
+  const userContext = useContext(UserContext) as UserContextType;
+  const [answerData, setAnswerData] = useState<Answer>({} as Answer);
+  const [userIsCreator, setUserIsCreator] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  useEffect(() => {
+    console.log("wut", userRole)
+    if(userContext.currentUser == null) {
+      setUserIsCreator(false);
+      return;
+    }
+    if (!userContext.currentUser || !answerData.creatorId) {
+      return; // Skip execution if currentUser or creatorId is not available
+    }
+  
+    setUserIsCreator(String(answer.creatorId) === String(userContext.currentUser.id) || String(userContext.currentUser.role) === "ADMIN");
+    console.log("userIsCreator666", String(answer.creatorId) === String(userContext.currentUser.id) || String(userContext.currentUser.role) === "ADMIN")
+  }, [answerData, userContext.currentUser, isLoggedIn]); // Include isLoggedIn as a dependency
+  
+  useEffect(() => {
+    if (userContext.currentUser) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, [userContext.currentUser]);
+  
   const handleImageLoad = () => {
     setLoadingImage(false);
   };
 
   //console.log("look userEmail4", userEmail)
  
-
+  // useEffect(() => {
+  //   async function getInitialVoteCount() {
+  //     console.log("interes", answer.id, userContext?.currentUser?.id)
+  //     try {
+  //       const response = await axios.post('http://localhost:8080/answers/vote', {
+  //         answerId: answer.id,
+  //         userId: userContext?.currentUser?.id,
+  //         voteType: "getCount",
+  //       });
+  
+  //       if (!response) throw new Error('Response is not OK');
+  
+  //       const initialVoteCount = response.data.voteCount;
+  //       setVoteCount(initialVoteCount);
+  
+  //     } catch (error) {
+  //      // console.error('Failed to get initial vote count:', error);
+  //     }
+  //   }
+  
+  //   getInitialVoteCount();
+  // }, []);
+  
+  
   useEffect(() => {
+    console.log("usrRoleis", userRole)
     if(answer.picture) {
       setImageUrl(answer.picture);
     }
@@ -78,6 +132,37 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
     //onEditClick(); // Call the onEditClick function
     onUpdateAnswer(answer); // Call the onUpdateAnswer function with the answer parameter
   };
+
+
+  // async function handleVote(voteType: string) {
+  //   try {
+  //     // Check if the user is not the creator of the question.
+  //     if (userIsCreator) {
+  //       console.error("User cannot vote their own answers");
+  //       return;
+  //     }
+  
+  //     const response = await axios.post('http://localhost:8080/answers/vote', {
+  //       answerId: answer.id,
+  //       userId: Number(userContext?.currentUser?.id), // assuming this is the user's id
+  //       voteType,
+  //     });
+  //     console.log("responsexy: ", response)
+  //     if (!response) throw new Error('Response is not OK');
+      
+  //     const updatedVoteCount = response.data.voteCount;
+  //     setVoteCount(updatedVoteCount) ;
+  //     setAnswerData((prevData) => ({
+  //       ...prevData,
+  //       voteStatus: updatedVoteCount,
+  //     }));
+  
+  //   } catch (error) {
+  //     console.error('Failed to cast vote:', error);
+  //   }
+  // }
+
+
   return (
     <Flex>
       <Box mr={2}>
@@ -140,9 +225,17 @@ const AnswerItem: React.FC<AnswerItemProps> = ({
           fontWeight={600}
           color="gray.500"
         >
-          <Icon as={IoArrowUpCircleOutline} />
-          <Icon as={IoArrowDownCircleOutline} />
-          {String(userEmail?.split("@")[0])===String(answer.authorName) && (
+          <Icon as={IoArrowUpCircleOutline} 
+          onClick={(event) => {
+            //event.stopPropagation(); handleVote('upvote')
+          }}/>
+          <Icon as={IoArrowDownCircleOutline} 
+            onClick={(event) => {
+              //event.stopPropagation();
+              //handleVote('downvote')
+            }}
+          />
+          {(String(userEmail?.split("@")[0])===String(answer.authorName) || (userRole === "ADMIN")) && (
             <>
               <Text fontSize="9pt" _hover={{ color: "brand.300" }}
                 onClick={handleEditAnswer}

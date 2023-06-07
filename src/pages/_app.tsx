@@ -28,7 +28,8 @@ export default function App({ Component, pageProps }: AppProps) {
       // if (decodedToken.exp > currentTime) {
         setCurrentUser({
           id: decodedToken.sub,
-          email: decodedToken.email
+          email: decodedToken.email,
+          role: decodedToken.role
         });
         console.log("this is decodedToken", decodedToken)
       // }
