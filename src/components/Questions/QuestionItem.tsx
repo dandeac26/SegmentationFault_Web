@@ -253,6 +253,7 @@ useEffect(() => {
     console.log("userIsCreator (outside useEffect): ", userIsCreator);
   }, [userIsCreator]);
 
+  const [voteCount, setVoteCount] = useState(0);
 
   async function handleVote(voteType: string) {
     try {
@@ -267,10 +268,11 @@ useEffect(() => {
         userId: userContext?.currentUser?.id, // assuming this is the user's id
         voteType,
       });
-  
+      console.log("responsexy: ", response)
       if (!response) throw new Error('Response is not OK');
       
       const updatedVoteCount = response.data.voteCount;
+      setVoteCount(updatedVoteCount) ;
       setQuestionData((prevData) => ({
         ...prevData,
         voteStatus: updatedVoteCount,
@@ -281,7 +283,27 @@ useEffect(() => {
     }
   }
 
-
+  useEffect(() => {
+    async function getInitialVoteCount() {
+      try {
+        const response = await axios.post('http://localhost:8080/questions/vote', {
+          questionId: question.id,
+          userId: userContext?.currentUser?.id,
+          voteType: "getCount",
+        });
+  
+        if (!response) throw new Error('Response is not OK');
+  
+        const initialVoteCount = response.data.voteCount;
+        setVoteCount(initialVoteCount);
+  
+      } catch (error) {
+        console.error('Failed to get initial vote count:', error);
+      }
+    }
+  
+    getInitialVoteCount();
+  }, []); 
 
   return (
     <Flex
@@ -311,10 +333,11 @@ useEffect(() => {
           color={userVoteValue === 1 ? "#2bcc8c" : "gray.500"}
           fontSize={22}
           cursor="pointer"
-          onClick={(event) => handleVote('upvote')}
+          onClick={(event) => {
+            event.stopPropagation(); handleVote('upvote')}}
         />
         <Text fontSize="9pt" fontWeight={600}>
-          {question.voteStatus}
+          {voteCount}
         </Text>
         <Icon
           as={
@@ -325,8 +348,11 @@ useEffect(() => {
           color={userVoteValue === -1 ? "brand.600" : "gray.500"}
           fontSize={22}
           cursor="pointer"
-          onClick={() => handleVote('downvote')}
-        />
+          onClick={(event) => {
+            event.stopPropagation();
+            handleVote('downvote')}
+          }
+          />
       </Flex>
       <Flex direction="column" width="100%" bg="brand.400" maxHeight="500" overflow="auto">
         <Stack spacing={1} p="10px 10px">
